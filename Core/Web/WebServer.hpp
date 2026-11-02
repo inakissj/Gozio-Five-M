@@ -81,6 +81,13 @@ namespace Core
 				return params;
 			}
 
+			bool IsAuthenticated(const std::unordered_map<std::string, std::string>& params)
+			{
+				auto it = params.find("auth");
+				if (it == params.end()) return false;
+				return it->second == std::string(g_Config.Web->ConnectionCode);
+			}
+
 			std::string BuildStatusJson()
 			{
 				std::ostringstream ss;
@@ -451,25 +458,38 @@ namespace Core
 					responseBody = GetHtmlPage();
 					contentType = "text/html; charset=utf-8";
 				}
+				else if (path == "/api/auth")
+				{
+					auto itCode = params.find("code");
+					if (itCode != params.end() && itCode->second == std::string(g_Config.Web->ConnectionCode))
+						responseBody = "{\"authenticated\": true, \"code\": \"" + std::string(g_Config.Web->ConnectionCode) + "\"}";
+					else
+						responseBody = "{\"authenticated\": false}";
+				}
 				else if (path == "/api/status")
 				{
-					responseBody = BuildStatusJson();
+					if (!IsAuthenticated(params)) { statusCode = 401; responseBody = "{\"error\": \"unauthorized\"}"; }
+					else responseBody = BuildStatusJson();
 				}
 				else if (path == "/api/blips" || path == "/api/players")
 				{
-					responseBody = BuildBlipsJson();
+					if (!IsAuthenticated(params)) { statusCode = 401; responseBody = "{\"error\": \"unauthorized\"}"; }
+					else responseBody = BuildBlipsJson();
 				}
 				else if (path == "/api/config")
 				{
-					responseBody = BuildConfigJson();
+					if (!IsAuthenticated(params)) { statusCode = 401; responseBody = "{\"error\": \"unauthorized\"}"; }
+					else responseBody = BuildConfigJson();
 				}
 				else if (path == "/api/set")
 				{
-					responseBody = HandleApiSet(params);
+					if (!IsAuthenticated(params)) { statusCode = 401; responseBody = "{\"error\": \"unauthorized\"}"; }
+					else responseBody = HandleApiSet(params);
 				}
 				else if (path == "/api/teleport")
 				{
-					responseBody = HandleTeleport(params);
+					if (!IsAuthenticated(params)) { statusCode = 401; responseBody = "{\"error\": \"unauthorized\"}"; }
+					else responseBody = HandleTeleport(params);
 				}
 				else if (path == "/api/admin/add")
 				{
@@ -623,6 +643,11 @@ namespace Core
 				m_Running = true;
 				g_Config.Web->Port = m_Port;
 				g_Config.Web->Running = true;
+
+				// Generate 6-digit connection code
+				srand((unsigned int)time(nullptr) ^ (unsigned int)GetTickCount64());
+				int connCode = 100000 + rand() % 900000;
+				sprintf_s(g_Config.Web->ConnectionCode, "%d", connCode);
 
 				std::cout << "[WebRadar] Running at http://localhost:" << m_Port << std::endl;
 

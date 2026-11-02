@@ -152,9 +152,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .dtable tr:hover td{background:rgba(255,255,255,.02)}
 .badge-admin{color:#ef4444;font-size:9px;font-weight:700}
 .badge-player{color:var(--dim);font-size:9px;font-weight:600}
+
+/* CONNECT SCREEN */
+.connect-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+.connect-box{width:360px;text-align:center}
+.connect-logo{width:56px;height:56px;border-radius:12px;background:var(--white);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--bg);margin:0 auto 20px;letter-spacing:-.5px}
+.connect-title{font-size:22px;font-weight:800;color:var(--white);margin-bottom:6px}
+.connect-desc{font-size:12px;color:var(--dim);margin-bottom:28px;line-height:1.5}
+.connect-input{width:100%;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--white);font-size:20px;font-weight:700;text-align:center;letter-spacing:12px;outline:none;font-family:Consolas,monospace;transition:border-color .15s}
+.connect-input:focus{border-color:var(--accent)}
+.connect-input::placeholder{color:var(--dim2);letter-spacing:4px;font-size:13px;font-weight:500}
+.connect-btn{width:100%;padding:12px;background:var(--accent);border:none;border-radius:8px;color:var(--white);font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;transition:all .15s;letter-spacing:.3px}
+.connect-btn:hover{background:var(--accent2)}
+.connect-btn:disabled{opacity:.5;cursor:not-allowed}
+.connect-error{color:#ef4444;font-size:11px;margin-top:10px;display:none;font-weight:600}
+.connect-hint{color:var(--dim2);font-size:10px;margin-top:20px;line-height:1.5}
 </style>
 </head>
 <body>
+
+<!-- CONNECT SCREEN -->
+<div class="connect-overlay" id="connect-screen">
+<div class="connect-box">
+<div class="connect-logo">p4</div>
+<div class="connect-title">p4m Web Panel</div>
+<div class="connect-desc">Enter the connection code shown in the p4m overlay menu<br>Settings > Web Map Radar Server</div>
+<input class="connect-input" id="connect-code" type="text" maxlength="6" placeholder="000000" autocomplete="off" autofocus>
+<button class="connect-btn" id="connect-btn" onclick="doConnect()">Connect</button>
+<div class="connect-error" id="connect-error">Invalid code. Check the code in the overlay menu.</div>
+<div class="connect-hint">The code is generated when the web server starts.<br>You can find it in Settings inside the p4m menu.</div>
+</div>
+</div>
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -261,6 +289,33 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 var cfg={},blipData={},gtaMap=null,tileLayers={},currentStyle='atlas';
 var layerGroups={},selfMarker=null,wpMarker=null,wpData=null;
 var showNames=true,curPage='radar';
+var authCode=localStorage.getItem('p4m_auth')||'';
+var authenticated=false;
+
+function doConnect(){
+var code=document.getElementById('connect-code').value.trim();
+if(code.length!==6){document.getElementById('connect-error').style.display='block';document.getElementById('connect-error').textContent='Enter a 6-digit code.';return}
+var btn=document.getElementById('connect-btn');btn.disabled=true;btn.textContent='Connecting...';
+fetch('/api/auth?code='+code).then(function(r){return r.json()}).then(function(d){
+if(d.authenticated){
+authCode=code;authenticated=true;localStorage.setItem('p4m_auth',code);
+document.getElementById('connect-screen').style.display='none';
+initMap();poll();setInterval(poll,350);
+}else{
+document.getElementById('connect-error').style.display='block';
+document.getElementById('connect-error').textContent='Invalid code. Check the code in the overlay menu.';
+btn.disabled=false;btn.textContent='Connect';
+}
+}).catch(function(){
+document.getElementById('connect-error').style.display='block';
+document.getElementById('connect-error').textContent='Cannot reach p4m server. Make sure the cheat is running.';
+btn.disabled=false;btn.textContent='Connect';
+});
+}
+document.getElementById('connect-code').addEventListener('keydown',function(e){if(e.key==='Enter')doConnect()});
+
+function api(path){return path+(path.indexOf('?')>=0?'&':'?')+'auth='+authCode}
+
 
 var PAGE_INFO={
 radar:['Radar','Live map of the session'],
@@ -359,7 +414,7 @@ if(bd.players&&bd.players.length){
 h+='<table class="dtable"><thead><tr><th>Name</th><th>Weapon</th><th>HP</th><th>Armor</th><th>Distance</th><th></th></tr></thead><tbody>';
 bd.players.forEach(function(p){
 var badge=p.is_admin?'<span class="badge-admin">ADMIN</span>':'<span class="badge-player">PLAYER</span>';
-h+='<tr><td>'+p.name+' '+badge+'</td><td style="color:var(--dim);font-size:10px">'+p.weapon.replace('WEAPON_','')+'</td><td>'+p.health+'</td><td>'+p.armor+'</td><td>'+p.dist+'m</td><td><button class="tp-go" style="font-size:8px;padding:2px 8px" onclick="fetch(\'/api/teleport?x='+p.x+'&y='+p.y+'\')">TP</button></td></tr>';
+h+='<tr><td>'+p.name+' '+badge+'</td><td style="color:var(--dim);font-size:10px">'+p.weapon.replace('WEAPON_','')+'</td><td>'+p.health+'</td><td>'+p.armor+'</td><td>'+p.dist+'m</td><td><button class="tp-go" style="font-size:8px;padding:2px 8px" onclick="fetch(api(\'/api/teleport?x='+p.x+'&y='+p.y+'\'))">TP</button></td></tr>';
 });
 h+='</tbody></table>';
 }else h+='<p class="info-text">No players detected.</p>';
@@ -377,7 +432,7 @@ h+='</tbody></table>';
 h='<div class="cfg-title">Exploits</div><div class="cfg-desc">Weapon spawn exploits</div>';
 h+='<div class="cfg-section"><div class="cfg-section-title">TELEPORT LOCATIONS</div><div class="tp-list">';
 TELEPORTS.forEach(function(t){
-h+='<div class="tp-row"><div><div class="tp-name">'+t.name+'</div><div class="tp-coords">'+t.x.toFixed(1)+', '+t.y.toFixed(1)+', '+t.z.toFixed(1)+'</div></div><button class="tp-go" onclick="fetch(\'/api/teleport?x='+t.x+'&y='+t.y+'&z='+t.z+'\')">GO</button></div>';
+h+='<div class="tp-row"><div><div class="tp-name">'+t.name+'</div><div class="tp-coords">'+t.x.toFixed(1)+', '+t.y.toFixed(1)+', '+t.z.toFixed(1)+'</div></div><button class="tp-go" onclick="fetch(api(\'/api/teleport?x='+t.x+'&y='+t.y+'&z='+t.z+'\'))">GO</button></div>';
 });
 h+='</div></div>';
 }else if(id==='settings'){
@@ -394,7 +449,7 @@ function toggleSection(id){document.getElementById(id).classList.toggle('collaps
 function setVal(key,val){
 var v=(val===true||val===false)?val:parseFloat(val);
 cfg[key]=v;
-fetch('/api/set?'+key+'='+(v===true?'true':v===false?'false':v));
+fetch(api('/api/set?'+key+'='+(v===true?'true':v===false?'false':v)));
 }
 function syncCfgUI(){
 Object.keys(cfg).forEach(function(k){
@@ -433,7 +488,7 @@ wpMarker=L.marker(ll,{icon:L.divIcon({className:'gta-wp',iconSize:[12,12],iconAn
 document.getElementById('wp-card').style.display='flex';
 document.getElementById('wp-coords').textContent='X: '+ll.lng.toFixed(1)+', Y: '+ll.lat.toFixed(1);
 }
-function teleportWP(){if(wpData)fetch('/api/teleport?x='+wpData.lng.toFixed(1)+'&y='+wpData.lat.toFixed(1));clearWP()}
+function teleportWP(){if(wpData)fetch(api('/api/teleport?x='+wpData.lng.toFixed(1)+'&y='+wpData.lat.toFixed(1)));clearWP()}
 function clearWP(){
 if(wpMarker){gtaMap.removeLayer(wpMarker);wpMarker=null}wpData=null;
 document.getElementById('wp-card').style.display='none';
@@ -481,9 +536,9 @@ if(curPage==='players'||curPage==='vehicles')renderCfgPage(curPage);
 }
 
 function poll(){
-fetch('/api/blips').then(function(r){return r.json()}).then(function(d){updateMarkers(d)}).catch(function(){});
-fetch('/api/config').then(function(r){return r.json()}).then(function(d){cfg=d;syncCfgUI()}).catch(function(){});
-fetch('/api/status').then(function(r){return r.json()}).then(function(d){
+fetch(api('/api/blips')).then(function(r){return r.json()}).then(function(d){updateMarkers(d)}).catch(function(){});
+fetch(api('/api/config')).then(function(r){return r.json()}).then(function(d){cfg=d;syncCfgUI()}).catch(function(){});
+fetch(api('/api/status')).then(function(r){return r.json()}).then(function(d){
 var b=document.getElementById('conn-badge');
 if(d.connected){b.innerHTML='<span class="user-status-dot"></span> Connected';b.style.borderColor='rgba(34,197,94,.2)';b.style.color='#22c55e'}
 else{b.innerHTML='Disconnected';b.style.borderColor='rgba(239,68,68,.2)';b.style.color='#ef4444'}
@@ -492,8 +547,16 @@ var b=document.getElementById('conn-badge');b.innerHTML='Offline';b.style.border
 });
 }
 
-initMap();poll();
-setInterval(poll,350);
+// Try auto-reconnect with saved code
+if(authCode){
+fetch('/api/auth?code='+authCode).then(function(r){return r.json()}).then(function(d){
+if(d.authenticated){
+authenticated=true;
+document.getElementById('connect-screen').style.display='none';
+initMap();poll();setInterval(poll,350);
+}else{localStorage.removeItem('p4m_auth');authCode=''}
+}).catch(function(){});
+}
 </script>
 </body>
 </html>

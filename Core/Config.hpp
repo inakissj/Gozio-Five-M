@@ -121,6 +121,7 @@ namespace Core {
 			inline static bool Running = false;
 			inline static bool CloudSync = false;
 			inline static char CloudUrl[ 256 ] = "http://127.0.0.1:5000";
+			inline static char ConnectionCode[8] = "";
 		} *Web;
 
 		struct VehicleESP {

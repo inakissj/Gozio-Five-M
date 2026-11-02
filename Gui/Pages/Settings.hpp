@@ -143,6 +143,28 @@ namespace Settings {
 
 						ImGui::Spacing();
 						Custom::CheckBox(xorstr("Web Map Radar Server"), &g_Config.Web->Enabled);
+							if (g_Config.Web->Enabled && Core::Web::g_WebServer.IsRunning() && strlen(g_Config.Web->ConnectionCode) > 0)
+							{
+								ImGui::Spacing();
+								ImGui::TextColored(ImVec4(1.0f, 0.84f, 0.0f, 1.0f), "Connection Code: %s", g_Config.Web->ConnectionCode);
+								if (Custom::Button(xorstr("Copy Code"), ImVec2(-1, 24), 0))
+								{
+									if (OpenClipboard(NULL))
+									{
+										EmptyClipboard();
+										HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, strlen(g_Config.Web->ConnectionCode) + 1);
+										if (hMem)
+										{
+											memcpy(GlobalLock(hMem), g_Config.Web->ConnectionCode, strlen(g_Config.Web->ConnectionCode) + 1);
+											GlobalUnlock(hMem);
+											SetClipboardData(CF_TEXT, hMem);
+										}
+										CloseClipboard();
+										NotifyManager::Send("Code copied!", 2000);
+									}
+								}
+								ImGui::Spacing();
+							}
 						Custom::CheckBox(xorstr("Render Cloud Sync"), &g_Config.Web->CloudSync);
 						ImGui::InputText(xorstr("Render URL"), g_Config.Web->CloudUrl, sizeof(g_Config.Web->CloudUrl));
 						if (Custom::Button(xorstr("Open Web GTA Map Radar"), ImVec2(-1, 30), 0))
