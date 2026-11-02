@@ -173,7 +173,7 @@ namespace Core
 					curl_easy_setopt(hnd, CURLOPT_URL, ApiUrl.c_str());
 
 					struct curl_slist* headers = NULL;
-					headers = curl_slist_append(headers, xorstr("User-Agent: p4m"));
+					headers = curl_slist_append(headers, xorstr("User-Agent: Gozio"));
 					curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, headers);
 
 					curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, WriteCallBack);

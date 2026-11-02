@@ -37,11 +37,11 @@ namespace Custom
             ImVec2 ClarityPos = TextPos;
 
             // Dibujar "Clarity" con el color basado en accent_color
-            DrawList->AddText(ClarityPos, primaryColor, "p4m");
+            DrawList->AddText(ClarityPos, primaryColor, "Gozio");
 
             // Dibujar el resto del texto en blanco
             std::string restText = "   -   " + std::string(timeStr);
-            ImVec2 RestTextPos = ImVec2(ClarityPos.x + ImGui::CalcTextSize("p4m").x + 5, ClarityPos.y);
+            ImVec2 RestTextPos = ImVec2(ClarityPos.x + ImGui::CalcTextSize("Gozio").x + 5, ClarityPos.y);
             DrawList->AddText(RestTextPos, ImColor(255, 255, 255), restText.c_str());
 
             // Posiciones de la barra de progreso

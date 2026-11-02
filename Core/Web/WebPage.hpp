@@ -14,7 +14,7 @@ namespace Core
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>p4m</title>
+<title>Gozio</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 :root{--bg:#0b0c10;--bg2:#101217;--bg3:#161920;--bg4:#1c1f28;--bg5:#22252f;--text:#e2e4e9;--white:#fff;--dim:#6b7080;--dim2:#484c58;--border:#1a1d25;--accent:#4f6ef7;--accent2:#3b5bdb;--sidebar-w:190px;--topbar-h:44px}
@@ -24,7 +24,8 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 /* SIDEBAR */
 .sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;z-index:20;overflow:hidden}
 .sidebar-brand{padding:16px 14px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
-.brand-icon{width:28px;height:28px;border-radius:6px;background:var(--white);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:9px;color:var(--bg);letter-spacing:-.3px;flex-shrink:0}
+.brand-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background:transparent}
+.brand-icon img{width:100%;height:100%;object-fit:contain}
 .brand-text{display:flex;flex-direction:column}
 .brand-name{font-size:13px;font-weight:800;color:var(--white);letter-spacing:.3px}
 .brand-sub{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
@@ -156,7 +157,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 /* CONNECT SCREEN */
 .connect-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
 .connect-box{width:360px;text-align:center}
-.connect-logo{width:56px;height:56px;border-radius:12px;background:var(--white);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--bg);margin:0 auto 20px;letter-spacing:-.5px}
+.connect-logo{width:140px;height:auto;margin:0 auto 20px}
+.connect-logo img{width:100%;height:auto}
 .connect-title{font-size:22px;font-weight:800;color:var(--white);margin-bottom:6px}
 .connect-desc{font-size:12px;color:var(--dim);margin-bottom:28px;line-height:1.5}
 .connect-input{width:100%;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--white);font-size:20px;font-weight:700;text-align:center;letter-spacing:12px;outline:none;font-family:Consolas,monospace;transition:border-color .15s}
@@ -174,21 +176,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 <!-- CONNECT SCREEN -->
 <div class="connect-overlay" id="connect-screen">
 <div class="connect-box">
-<div class="connect-logo">p4</div>
-<div class="connect-title">p4m Web Panel</div>
-<div class="connect-desc">Enter the connection code shown in the p4m overlay menu<br>Settings > Web Map Radar Server</div>
+<div class="connect-logo"><img src="data:image/png;base64,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" alt="Gozio"></div>
+<div class="connect-title">Gozio Web Panel</div>
+<div class="connect-desc">Enter the connection code shown in the Gozio overlay menu<br>Settings > Web Map Radar Server</div>
 <input class="connect-input" id="connect-code" type="text" maxlength="6" placeholder="000000" autocomplete="off" autofocus>
 <button class="connect-btn" id="connect-btn" onclick="doConnect()">Connect</button>
 <div class="connect-error" id="connect-error">Invalid code. Check the code in the overlay menu.</div>
-<div class="connect-hint">The code is generated when the web server starts.<br>You can find it in Settings inside the p4m menu.</div>
+<div class="connect-hint">The code is generated when the web server starts.<br>You can find it in Settings inside the Gozio menu.</div>
 </div>
 </div>
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
 <div class="sidebar-brand">
-<div class="brand-icon">p4</div>
-<div class="brand-text"><span class="brand-name">p4m</span><span class="brand-sub">Web Panel</span></div>
+<div class="brand-icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAWCAYAAACyjt6wAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAPJSURBVEhL7ZfrT1N3GMf9t/ZiL5dpxLIsKpMFNjTOLVmWyGKym8liTJTsIi5LnDJkFOTqNpE7lVKgrdArpbTQ0hu09EIr9EYPtKfns7QkjCKIiTHywk9y3jzf5zz5/J5fzotzTJKk9yRJun5Un2OSJN3iCFMQvL63eJR4K/iqlAimtnKl6RGgRHAlkaFeF2AqlEaSpNLON8RzVzzuifJBl5Xv1EEU3nUanzr5acrPLWOEenOUenOMX00xbptjXFP7aRqfIZ8Xd494IfGtPH+YgujcK3ujfXlOECT0Lj+Xey1U9bm41L/A+SEPH/W6KZdPc1au5hO5ioo2HRV3+pld9Ja+fgjd9ggnfuvF5lneG+3LPoLb/Du7RPVDM5+PBqh+7OCKfBCDzcFadBVxI4HJ6cXl396CL7FJvyeO1hdFEPPFWi4vYY4K6CMZ9KE0U+ENrKF1vKEoKpubeGar2BffzKH0pxj2JQmmtmu7OVBwNSXwvcpL1XCAi60qkvFnLMczaANJDNEt5qOpYt+4P0H10BLv31Eg+1PFt+ogcSFX7JW16jjbYeL88DInWk00K7TY41nOPZpn0u4hKojUqgKUtZmRtRqpGfSgW0mUeBwomBIEdJ4gl0d9/PBYX6z5o2tcHbFzvNvB1U4FQjbLl2MrVDZPoJ2xMhdc49NBLzfGFxEEAZt7CfmUgzM9i9TKByG7SZ83ycn2WaYXPDQvJDj1wMT9oUnmvAGuaQLU9NgJr/8veaBgVhTp0lpptwS4rTACedI5iW+eRvnw7gjB4Aqrm3kq+jz8MrR9gAI39BE+7tAjpBIULuxrdYTKhmHC4VAx73OvFz/CcZubm6Y1ajqmkIR0MRv2JShrn0U159qZd6BggeBqjM+ahhhxFoZL/G6JcbzFSMuIuphvZEW+Ui5zZdTDMyGHNyFwURnkUssY4uYGP5tiyFr1PNSYSeYkBFFiwBOnvMuK3uGl0xmnoseBJZwknRW5aYwha9Iw4/TsOLxQsEDXqJrTDQpanCmqBpf44v4Am5mNnVwXWKOyZ4HTck1xc2X3lCgNFrodMU522Tn3j50LA4vFrTWPm3iylODdxmkm5lyks3lqRxYpbzNS/UCDrEVH3d9PEHPZnfmHCpIXuVB3l1OtRs7ItUxb5/d2YPOH+WvMQMOoAdPC9vX0W9y0TFro0M7Rpp2jUWnEFQgRSWZoHDXgDUeLfWvJNJ0aCw1KI/3TFqRdcgUOFywIOBd558cm6h5N7I1eOy8lWKB9TIcvFNlbfu28tOCb4q3gq1IQPNL/JP8BpgLxNWtrdSgAAAAASUVORK5CYII=" alt="Gozio"></div>
+<div class="brand-text"><span class="brand-name">Gozio</span><span class="brand-sub">Web Panel</span></div>
 </div>
 <div class="sidebar-nav">
 <div class="nav-section" id="sec-menu">
@@ -211,8 +213,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 </div>
 <div class="sidebar-bottom">
 <div class="sidebar-user">
-<div class="user-avatar">P4</div>
-<div class="user-info"><span class="user-name" id="user-name">p4m</span><span class="user-status"><span class="user-status-dot"></span> Online</span></div>
+<div class="user-avatar">GZ</div>
+<div class="user-info"><span class="user-name" id="user-name">Gozio</span><span class="user-status"><span class="user-status-dot"></span> Online</span></div>
 </div>
 </div>
 </nav>
@@ -289,7 +291,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 var cfg={},blipData={},gtaMap=null,tileLayers={},currentStyle='atlas';
 var layerGroups={},selfMarker=null,wpMarker=null,wpData=null;
 var showNames=true,curPage='radar';
-var authCode=localStorage.getItem('p4m_auth')||'';
+var authCode=localStorage.getItem('gozio_auth')||'';
 var authenticated=false;
 
 function doConnect(){
@@ -298,7 +300,7 @@ if(code.length!==6){document.getElementById('connect-error').style.display='bloc
 var btn=document.getElementById('connect-btn');btn.disabled=true;btn.textContent='Connecting...';
 fetch('/api/auth?code='+code).then(function(r){return r.json()}).then(function(d){
 if(d.authenticated){
-authCode=code;authenticated=true;localStorage.setItem('p4m_auth',code);
+authCode=code;authenticated=true;localStorage.setItem('gozio_auth',code);
 document.getElementById('connect-screen').style.display='none';
 initMap();poll();setInterval(poll,350);
 }else{
@@ -308,7 +310,7 @@ btn.disabled=false;btn.textContent='Connect';
 }
 }).catch(function(){
 document.getElementById('connect-error').style.display='block';
-document.getElementById('connect-error').textContent='Cannot reach p4m server. Make sure the cheat is running.';
+document.getElementById('connect-error').textContent='Cannot reach Gozio server. Make sure the cheat is running.';
 btn.disabled=false;btn.textContent='Connect';
 });
 }
@@ -554,7 +556,7 @@ if(d.authenticated){
 authenticated=true;
 document.getElementById('connect-screen').style.display='none';
 initMap();poll();setInterval(poll,350);
-}else{localStorage.removeItem('p4m_auth');authCode=''}
+}else{localStorage.removeItem('gozio_auth');authCode=''}
 }).catch(function(){});
 }
 </script>
