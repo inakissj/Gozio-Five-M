@@ -166,6 +166,40 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .connect-btn:disabled{opacity:.5;cursor:not-allowed}
 .connect-error{color:#ef4444;font-size:11px;margin-top:10px;display:none;font-weight:600}
 .connect-hint{color:var(--dim2);font-size:10px;margin-top:20px;line-height:1.5}
+
+/* ESP PREVIEW */
+.esp-wrap{display:flex;height:100%;overflow:hidden}
+.esp-viewport{flex:1;display:flex;flex-direction:column;background:#000;position:relative}
+.esp-toolbar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;font-size:10px;color:var(--dim);background:rgba(11,12,16,.6);border-bottom:1px solid var(--border);flex-shrink:0}
+.esp-toolbar-right{display:flex;align-items:center;gap:12px}
+.esp-toolbar label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.esp-toolbar button{background:none;border:1px solid var(--border);color:var(--dim);padding:3px 10px;border-radius:4px;font-size:9px;cursor:pointer;font-family:inherit}
+.esp-toolbar button:hover{color:var(--text);border-color:var(--dim2)}
+.esp-canvas-area{flex:1;position:relative}
+.esp-canvas-area canvas{position:absolute;inset:0;width:100%;height:100%}
+.esp-bottom{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;font-size:9px;color:var(--dim);background:rgba(11,12,16,.6);border-top:1px solid var(--border);flex-shrink:0}
+.esp-bottom-info{display:flex;gap:14px}
+.esp-bottom-info b{color:var(--text);font-weight:600}
+.esp-zoom{display:flex;align-items:center;gap:6px}
+.esp-zoom button{background:none;border:1px solid var(--border);color:var(--dim);width:20px;height:20px;border-radius:4px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.esp-zoom button:hover{color:var(--text)}
+.esp-panel{width:340px;background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto;flex-shrink:0;padding:16px}
+.esp-panel::-webkit-scrollbar{width:3px}
+.esp-panel::-webkit-scrollbar-thumb{background:var(--dim2);border-radius:3px}
+.esp-section{margin-bottom:16px}
+.esp-section-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.esp-section-icon{width:28px;height:28px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.esp-section-icon svg{width:14px;height:14px;color:var(--dim)}
+.esp-section-info{flex:1;display:flex;flex-direction:column}
+.esp-section-name{font-size:13px;font-weight:700;color:var(--white)}
+.esp-section-desc{font-size:10px;color:var(--dim)}
+.esp-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;min-height:28px}
+.esp-lbl{font-size:12px;color:var(--text);font-weight:500}
+.esp-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:5px;font-size:11px;font-family:inherit;outline:none;min-width:100px;cursor:pointer}
+.esp-color-row{display:flex;align-items:center;gap:8px;padding:5px 0}
+.esp-color-swatch{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);cursor:pointer;position:relative;overflow:hidden;flex-shrink:0}
+.esp-color-swatch input[type=color]{position:absolute;inset:-4px;width:36px;height:36px;border:none;padding:0;cursor:pointer;opacity:0}
+.esp-color-hex{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:5px;font-size:11px;font-family:Consolas,monospace;width:72px;outline:none}
 </style>
 </head>
 <body>
@@ -234,6 +268,7 @@ requestAnimationFrame(draw);
 <button class="nav-item" onclick="go('esp_players')">ESP Players</button>
 <button class="nav-item" onclick="go('esp_vehicles')">ESP Vehicles</button>
 <button class="nav-item" onclick="go('misc_esp')">Misc ESP</button>
+<button class="nav-item" onclick="go('esp_preview')">ESP Preview</button>
 <button class="nav-item active" onclick="go('radar')">Radar</button>
 <button class="nav-item" onclick="go('players')">Players</button>
 <button class="nav-item" onclick="go('vehicles')">Vehicles</button>
@@ -309,6 +344,16 @@ requestAnimationFrame(draw);
 <div class="page" id="pg-esp_players"><div class="cfg-page active" id="cfg-esp_players"></div></div>
 <div class="page" id="pg-esp_vehicles"><div class="cfg-page active" id="cfg-esp_vehicles"></div></div>
 <div class="page" id="pg-misc_esp"><div class="cfg-page active" id="cfg-misc_esp"></div></div>
+<div class="page" id="pg-esp_preview">
+<div class="esp-wrap">
+<div class="esp-viewport">
+<div class="esp-toolbar"><span>Drag to rotate &middot; Shift+drag to tilt &middot; Ctrl+scroll to zoom &middot; right-click items for options</span><div class="esp-toolbar-right"><label><input type="checkbox" id="esp-pv-box" checked onchange="espState.box=this.checked;espRedraw()"> Box</label><button onclick="espReset()">Reset positions</button></div></div>
+<div class="esp-canvas-area"><canvas id="esp-canvas"></canvas></div>
+<div class="esp-bottom"><div class="esp-bottom-info"><span>HP <b id="esp-hp-lbl">Bottom</b></span><span>AR <b id="esp-ar-lbl">Bottom</b></span><span>Text <b id="esp-txt-lbl">Bottom center</b></span></div><div class="esp-zoom"><button onclick="espDoZoom(-1)">&#8722;</button><button onclick="espDoZoom(0)">&#8634;</button><span id="esp-zoom-val">100%</span><button onclick="espDoZoom(1)">+</button></div></div>
+</div>
+<div class="esp-panel" id="esp-panel-content"></div>
+</div>
+</div>
 <div class="page" id="pg-players"><div class="cfg-page active" id="cfg-players"></div></div>
 <div class="page" id="pg-vehicles"><div class="cfg-page active" id="cfg-vehicles"></div></div>
 <div class="page" id="pg-exploits"><div class="cfg-page active" id="cfg-exploits"></div></div>
@@ -359,6 +404,7 @@ autopeek:['Auto Peek','Auto peek configuration'],
 esp_players:['ESP Players','Player ESP settings'],
 esp_vehicles:['ESP Vehicles','Vehicle ESP settings'],
 misc_esp:['Misc ESP','Miscellaneous ESP and local player options'],
+esp_preview:['ESP Preview','Preview ESP overlay settings'],
 players:['Players','Online players list'],
 vehicles:['Vehicles','Vehicle list'],
 exploits:['Exploits','Weapon exploits'],
@@ -395,14 +441,15 @@ document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('a
 var items=document.querySelectorAll('.nav-item');
 for(var i=0;i<items.length;i++){if(items[i].textContent.trim()===PAGE_INFO[id][0].replace('ESP ','').replace('Misc ','Misc '))items[i].classList.add('active')}
 var found=false;items.forEach(function(b){var t=b.textContent.trim();
-var map={'Aimbot':'aimbot','SilentAim':'silentaim','TriggerBot':'triggerbot','Auto Peek':'autopeek','ESP Players':'esp_players','ESP Vehicles':'esp_vehicles','Misc ESP':'misc_esp','Radar':'radar','Players':'players','Vehicles':'vehicles','Exploits':'exploits','Settings':'settings'};
+var map={'Aimbot':'aimbot','SilentAim':'silentaim','TriggerBot':'triggerbot','Auto Peek':'autopeek','ESP Players':'esp_players','ESP Vehicles':'esp_vehicles','Misc ESP':'misc_esp','ESP Preview':'esp_preview','Radar':'radar','Players':'players','Vehicles':'vehicles','Exploits':'exploits','Settings':'settings'};
 if(map[t]===id){b.classList.add('active');found=true}
 });
 var info=PAGE_INFO[id]||[id,''];
 document.getElementById('topbar-title').textContent=info[0];
 document.getElementById('topbar-desc').textContent=info[1];
 if(id==='radar'&&gtaMap)setTimeout(function(){gtaMap.invalidateSize()},50);
-if(id!=='radar')renderCfgPage(id);
+if(id==='esp_preview')setTimeout(initESPPreview,50);
+else if(id!=='radar')renderCfgPage(id);
 }
 
 function renderCfgPage(id){
@@ -578,6 +625,156 @@ else{b.innerHTML='Disconnected';b.style.borderColor='rgba(239,68,68,.2)';b.style
 }).catch(function(){
 var b=document.getElementById('conn-badge');b.innerHTML='Offline';b.style.borderColor='rgba(239,68,68,.2)';b.style.color='#ef4444';
 });
+}
+
+
+// ESP PREVIEW
+var espState={box:true,boxStyle:'full',boxThick:1.5,boxColor:'#ffffff',skeleton:true,skelColor:'#ffffff',skelOpacity:75,skelThick:1.5,hpPos:'bottom',arPos:'bottom',textPos:'bottom_center',textSize:14,hpColor:'#00ff63',arColor:'#87cffa',textColor:'#ffffff',hpOpacity:75,arOpacity:75,textOpacity:75};
+var espZoom=100,espCanvas=null,espCtx=null,espInited=false;
+
+function hexRgba(hex,a){var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16);return 'rgba('+r+','+g+','+b+','+a+')'}
+
+function initESPPreview(){
+espCanvas=document.getElementById('esp-canvas');
+if(!espCanvas)return;
+espCtx=espCanvas.getContext('2d');
+function resize(){var w=espCanvas.parentElement;espCanvas.width=w.clientWidth;espCanvas.height=w.clientHeight;espRedraw()}
+if(!espInited){window.addEventListener('resize',resize);buildEspPanel();espInited=true}
+setTimeout(resize,60);
+}
+
+function espDoZoom(d){if(d===0)espZoom=100;else espZoom=Math.max(50,Math.min(200,espZoom+d*25));document.getElementById('esp-zoom-val').textContent=espZoom+'%';espRedraw()}
+
+function espReset(){
+espState={box:true,boxStyle:'full',boxThick:1.5,boxColor:'#ffffff',skeleton:true,skelColor:'#ffffff',skelOpacity:75,skelThick:1.5,hpPos:'bottom',arPos:'bottom',textPos:'bottom_center',textSize:14,hpColor:'#00ff63',arColor:'#87cffa',textColor:'#ffffff',hpOpacity:75,arOpacity:75,textOpacity:75};
+espZoom=100;document.getElementById('esp-zoom-val').textContent='100%';
+buildEspPanel();espRedraw();
+}
+
+function espRedraw(){
+if(!espCtx||!espCanvas)return;
+var c=espCtx,w=espCanvas.width,h=espCanvas.height;
+c.fillStyle='#000';c.fillRect(0,0,w,h);
+var sc=(espZoom/100)*Math.min(w/700,h/550)*0.85;
+var cx=w*0.42,cy=h*0.48;
+var J={
+ht:[cx,cy-195*sc],hd:[cx,cy-170*sc],nk:[cx,cy-140*sc],
+ls:[cx-42*sc,cy-128*sc],rs:[cx+42*sc,cy-128*sc],
+le:[cx-65*sc,cy-72*sc],re:[cx+65*sc,cy-72*sc],
+lw:[cx-58*sc,cy-15*sc],rw:[cx+58*sc,cy-15*sc],
+sp:[cx,cy-80*sc],pv:[cx,cy-22*sc],
+lh:[cx-22*sc,cy-22*sc],rh:[cx+22*sc,cy-22*sc],
+lk:[cx-26*sc,cy+58*sc],rk:[cx+26*sc,cy+58*sc],
+lf:[cx-30*sc,cy+140*sc],rf:[cx+30*sc,cy+140*sc]
+};
+drawPedBody(c,J,sc);
+var bx1=cx-78*sc,by1=cy-205*sc,bx2=cx+78*sc,by2=cy+155*sc;
+if(espState.box){
+c.strokeStyle=espState.boxColor;c.lineWidth=espState.boxThick;
+if(espState.boxStyle==='full'){c.strokeRect(bx1,by1,bx2-bx1,by2-by1)}
+else if(espState.boxStyle==='corner'){
+var cl=22*sc;c.beginPath();
+c.moveTo(bx1,by1+cl);c.lineTo(bx1,by1);c.lineTo(bx1+cl,by1);c.moveTo(bx2-cl,by1);c.lineTo(bx2,by1);c.lineTo(bx2,by1+cl);
+c.moveTo(bx1,by2-cl);c.lineTo(bx1,by2);c.lineTo(bx1+cl,by2);c.moveTo(bx2-cl,by2);c.lineTo(bx2,by2);c.lineTo(bx2,by2-cl);
+c.stroke();
+}}
+if(espState.skeleton){
+var sa=espState.skelOpacity/100;
+c.strokeStyle=hexRgba(espState.skelColor,sa);c.lineWidth=espState.skelThick;c.lineCap='round';
+var bones=[['ht','hd'],['hd','nk'],['nk','ls'],['nk','rs'],['ls','le'],['rs','re'],['le','lw'],['re','rw'],['nk','sp'],['sp','pv'],['pv','lh'],['pv','rh'],['lh','lk'],['rh','rk'],['lk','lf'],['rk','rf']];
+bones.forEach(function(b){var a=J[b[0]],z=J[b[1]];c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(z[0],z[1]);c.stroke()});
+c.fillStyle=hexRgba(espState.skelColor,sa);
+Object.keys(J).forEach(function(k){c.beginPath();c.arc(J[k][0],J[k][1],3*sc,0,Math.PI*2);c.fill()});
+}
+var bw=bx2-bx1,bh=by2-by1;
+drawEspBar(c,espState.hpPos,bx1,by1,bw,bh,sc,espState.hpColor,espState.hpOpacity,0.82);
+drawEspBar(c,espState.arPos,bx1,by1,bw,bh,sc,espState.arColor,espState.arOpacity,0.65,true);
+var ty=by2+24*sc;
+c.textAlign='center';c.textBaseline='top';
+c.font='bold '+(espState.textSize*sc)+'px -apple-system,sans-serif';
+c.fillStyle=hexRgba(espState.textColor,espState.textOpacity/100);
+c.fillText('Player_Name',cx,ty);
+c.font=((espState.textSize-2)*sc)+'px -apple-system,sans-serif';
+c.fillStyle=hexRgba(espState.textColor,espState.textOpacity/100*0.7);
+c.fillText('Combat Pistol',cx,ty+espState.textSize*sc*1.1);
+c.fillText('12 m',cx,ty+espState.textSize*sc*2.2);
+document.getElementById('esp-hp-lbl').textContent=espState.hpPos.charAt(0).toUpperCase()+espState.hpPos.slice(1);
+document.getElementById('esp-ar-lbl').textContent=espState.arPos.charAt(0).toUpperCase()+espState.arPos.slice(1);
+document.getElementById('esp-txt-lbl').textContent=espState.textPos.replace('_',' ').replace(/\b\w/,function(c){return c.toUpperCase()});
+}
+
+function drawPedBody(c,J,s){
+c.lineCap='round';c.lineJoin='round';
+c.fillStyle='#222';
+c.beginPath();c.ellipse(J.hd[0],J.hd[1],18*s,22*s,0,0,Math.PI*2);c.fill();
+c.fillStyle='#1a1a1a';
+c.beginPath();c.ellipse(J.ht[0],J.ht[1],20*s,12*s,0,0,Math.PI*2);c.fill();
+c.fillStyle='#222';c.fillRect(J.nk[0]-7*s,J.nk[1],14*s,12*s);
+c.fillStyle='#1e1e1e';
+c.beginPath();c.moveTo(J.ls[0]-5*s,J.ls[1]);c.lineTo(J.rs[0]+5*s,J.rs[1]);c.lineTo(J.rh[0]+12*s,J.pv[1]);c.lineTo(J.lh[0]-12*s,J.pv[1]);c.closePath();c.fill();
+c.strokeStyle='#1e1e1e';
+['l','r'].forEach(function(d){
+var sh=d==='l'?J.ls:J.rs,el=d==='l'?J.le:J.re,wr=d==='l'?J.lw:J.rw;
+c.lineWidth=13*s;c.beginPath();c.moveTo(sh[0],sh[1]);c.lineTo(el[0],el[1]);c.stroke();
+c.lineWidth=11*s;c.beginPath();c.moveTo(el[0],el[1]);c.lineTo(wr[0],wr[1]);c.stroke();
+var hp=d==='l'?J.lh:J.rh,kn=d==='l'?J.lk:J.rk,ft=d==='l'?J.lf:J.rf;
+c.lineWidth=18*s;c.beginPath();c.moveTo(hp[0],hp[1]);c.lineTo(kn[0],kn[1]);c.stroke();
+c.lineWidth=14*s;c.beginPath();c.moveTo(kn[0],kn[1]);c.lineTo(ft[0],ft[1]);c.stroke();
+});
+c.fillStyle='#222';
+[J.lw,J.rw].forEach(function(h){c.beginPath();c.arc(h[0],h[1],5*s,0,Math.PI*2);c.fill()});
+c.strokeStyle='#1e1e1e';c.lineWidth=8*s;
+c.beginPath();c.moveTo(J.lf[0],J.lf[1]);c.lineTo(J.lf[0]-8*s,J.lf[1]+5*s);c.stroke();
+c.beginPath();c.moveTo(J.rf[0],J.rf[1]);c.lineTo(J.rf[0]+8*s,J.rf[1]+5*s);c.stroke();
+}
+
+function drawEspBar(c,pos,bx,by,bw,bh,s,color,opacity,fill,isSecond){
+var a=opacity/100,barT=4*s,off=isSecond?6*s:0;
+c.fillStyle='rgba(0,0,0,'+(a*0.5)+')';
+if(pos==='bottom'){c.fillRect(bx,by+bh+3*s+off,bw,barT);c.fillStyle=hexRgba(color,a);c.fillRect(bx,by+bh+3*s+off,bw*fill,barT)}
+else if(pos==='top'){c.fillRect(bx,by-barT-3*s-off,bw,barT);c.fillStyle=hexRgba(color,a);c.fillRect(bx,by-barT-3*s-off,bw*fill,barT)}
+else if(pos==='left'){var x=bx-barT-3*s-off;c.fillRect(x,by,barT,bh);c.fillStyle=hexRgba(color,a);var fh=bh*fill;c.fillRect(x,by+bh-fh,barT,fh)}
+else if(pos==='right'){var x=bx+bw+3*s+off;c.fillRect(x,by,barT,bh);c.fillStyle=hexRgba(color,a);var fh=bh*fill;c.fillRect(x,by+bh-fh,barT,fh)}
+}
+
+function espCPick(label,key,def){
+return '<div class="esp-color-row"><div class="esp-color-swatch" style="background:'+def+'" id="esw-'+key+'"><input type="color" value="'+def+'" onchange="espState.'+key+'=this.value;this.parentElement.style.background=this.value;document.getElementById(\'ehx-'+key+'\').value=this.value;espRedraw()"></div><span class="esp-lbl" style="flex:1;margin-left:4px">'+label+'</span><input class="esp-color-hex" id="ehx-'+key+'" value="'+def+'" onchange="espState.'+key+'=this.value;document.getElementById(\'esw-'+key+'\').style.background=this.value;espRedraw()"></div>';
+}
+function espOSlider(label,key,def){
+return '<div style="padding:2px 0"><div class="rng-h"><span>'+label+'</span><b id="esv-'+key+'">'+def+'%</b></div><input type="range" min="0" max="100" step="5" value="'+def+'" oninput="espState.'+key+'=parseInt(this.value);document.getElementById(\'esv-'+key+'\').textContent=this.value+\'%\';espRedraw()"></div>';
+}
+function espSlider(label,key,min,max,step,def,suffix){
+return '<div class="rng"><div class="rng-h"><span>'+label+'</span><b id="esv-'+key+'">'+def+(suffix||'')+'</b></div><input type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+def+'" oninput="espState.'+key+'=parseFloat(this.value);document.getElementById(\'esv-'+key+'\').textContent=this.value+\''+(suffix||'')+'\';espRedraw()"></div>';
+}
+
+function buildEspPanel(){
+var p=document.getElementById('esp-panel-content');if(!p)return;
+var h='';
+h+='<div class="esp-section"><div class="esp-section-header"><div class="esp-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="esp-section-info"><div class="esp-section-name">Box</div><div class="esp-section-desc">Style, thickness and color</div></div><label class="switch" style="margin-left:auto"><input type="checkbox" '+(espState.box?'checked':'')+' onchange="espState.box=this.checked;document.getElementById(\'esp-pv-box\').checked=this.checked;espRedraw()"><span class="sw-s"></span></label></div>';
+h+='<div class="esp-row"><span class="esp-lbl">Style</span><select class="esp-select" onchange="espState.boxStyle=this.value;espRedraw()"><option value="full"'+(espState.boxStyle==='full'?' selected':'')+'>Full</option><option value="corner"'+(espState.boxStyle==='corner'?' selected':'')+'>Corner</option></select></div>';
+h+=espSlider('Thickness','boxThick',0.5,5,0.5,espState.boxThick);
+h+=espCPick('Color','boxColor',espState.boxColor);
+h+='</div>';
+h+='<div class="esp-section"><div class="esp-section-header"><div class="esp-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="15"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="12" y1="15" x2="8" y2="21"/><line x1="12" y1="15" x2="16" y2="21"/></svg></div><div class="esp-section-info"><div class="esp-section-name">Skeleton</div><div class="esp-section-desc">Bone lines and joint dots</div></div><label class="switch" style="margin-left:auto"><input type="checkbox" '+(espState.skeleton?'checked':'')+' onchange="espState.skeleton=this.checked;espRedraw()"><span class="sw-s"></span></label></div>';
+h+=espSlider('Thickness','skelThick',0.5,4,0.5,espState.skelThick);
+h+=espCPick('Color','skelColor',espState.skelColor);
+h+=espOSlider('Opacity','skelOpacity',espState.skelOpacity);
+h+='</div>';
+h+='<div class="esp-section"><div class="esp-section-header"><div class="esp-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div class="esp-section-info"><div class="esp-section-name">Positions</div><div class="esp-section-desc">Anchors around the player box</div></div></div>';
+var posOpts='<option value="bottom">Bottom</option><option value="top">Top</option><option value="left">Left</option><option value="right">Right</option>';
+h+='<div class="esp-row"><span class="esp-lbl">Health bar</span><select class="esp-select" id="esp-sel-hp" onchange="espState.hpPos=this.value;espRedraw()">'+posOpts+'</select></div>';
+h+='<div class="esp-row"><span class="esp-lbl">Armor bar</span><select class="esp-select" id="esp-sel-ar" onchange="espState.arPos=this.value;espRedraw()">'+posOpts+'</select></div>';
+h+='<div class="esp-row"><span class="esp-lbl">Text stack</span><select class="esp-select" onchange="espState.textPos=this.value;espRedraw()"><option value="bottom_center">Bottom center</option><option value="top_center">Top center</option></select></div>';
+h+=espSlider('Text size','textSize',8,24,0.5,espState.textSize.toFixed(1));
+h+='</div>';
+h+='<div class="esp-section"><div class="esp-section-header"><div class="esp-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg></div><div class="esp-section-info"><div class="esp-section-name">Colors</div><div class="esp-section-desc">Same pickers as the item menus</div></div></div>';
+h+=espCPick('HP bar','hpColor',espState.hpColor);h+=espOSlider('','hpOpacity',espState.hpOpacity);
+h+=espCPick('AR bar','arColor',espState.arColor);h+=espOSlider('','arOpacity',espState.arOpacity);
+h+=espCPick('Text','textColor',espState.textColor);h+=espOSlider('','textOpacity',espState.textOpacity);
+h+='</div>';
+p.innerHTML=h;
+if(document.getElementById('esp-sel-hp'))document.getElementById('esp-sel-hp').value=espState.hpPos;
+if(document.getElementById('esp-sel-ar'))document.getElementById('esp-sel-ar').value=espState.arPos;
 }
 
 // Try auto-reconnect with saved code
