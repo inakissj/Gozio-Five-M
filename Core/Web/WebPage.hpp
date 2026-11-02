@@ -1,20 +1,16 @@
 #pragma once
-#include <Core/Web/WebServer.hpp>
+#include <string>
 
-namespace Core
-{
-	namespace Web
-	{
-		inline std::string cWebServer::GetHtmlPage()
-		{
-			std::string page;
-			page.reserve(65536);
-			page += R"WEBAPP(<!DOCTYPE html>
+namespace WebPage {
+    inline std::string GetPage() {
+        std::string page;
+        page += R"WEBAPP(<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Gozio</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMfSURBVFhHY2AYBaNgFIyCUTBYQN2+fewdu+/yoYvTDRSsPMaRt/3GxNKTHzoqdl8T+l9Tw9hz478wiN128gkcz/30T6RiyyUBdP24QM+jfxzoYjhBwvKDMhlbbtzLO/jiRc7Wq3uztt14nnfwxZfcfY//5+y+/z93z8P/GVtufA9qnR2JrhcdtF/6IJC949aFiEmrU9Dl8AJ7e3vu1DVnzhccf/8/7+ib/7HLjv8ImrR+rlfznOKYWdv6/drmt4DUtZz+IlF++KksTB/Ip9M+/xOt33lHtO/BP4miHZfUI6asm+1f3i4Pkq/bf4W77e4/VWS7cIL0tWfTCk98+J+88eofy7gs2+yFu1U7X/1TKd9xWQ8kn7vvYWH2nod/k1ad/ltw4OnK////M2ZuvjIrd9/Rb7n7n35MWXfhY1D9FNu8fY/WxE7f4ld68rVx3qGXL/IPv/qff+DppeKdNxTQ7UQBqS0tEllbb6yMW3biBYifMH2jS+GJ9/8jZu+6krF4rxoodPz716wI613qmXfwxd/kNedb/Nvn6SQsOtRYcv7nf8+mWW2tx++KFZ36/D9y2saM3ANPL0cvOnTHvWaab97+J1fSN145w8DAwIhuLxz41M8Ujp6+ZVrS4oMzQPzSUx8ycw+9/G8em2fddPOfXsm57/89ynsMQHK5+x7diFl0+CSIXXDs7fnQGVv3gdigaMjZ//R/zMxtxVl7Hv4Im7G5ASReePBpT8a2m/81NDS4UW1FA86lPWHRc3ddqDn30bPg2Lv//t0rNoHE6/a/5M7e++hu7oFnFzI3X+0FhYZ34+zSoqMvZ1Zc//8/de25Hbm77k7IWH7Yo/j05//BE1ZG5+59OCnv8KvPGRsudeTuffQ/dPLGA+j2YQVOZX3bQMGYsPL0dy0XH3iCS5i+WSVu6dGd0fP33vRpX9SY1D1HLmH5iUMxiw8fiF91+kzE7J2nI3sXmMYtPbLbv2WeW01NDWP88uNzoufvvRU+fctKTXtPcVSbcAA5ExvF8Nk7/wd0LmlEl6MbcC/tjDBPLhREFx8Fo2AUjIJRQC0AALOGjq/9oY30AAAAAElFTkSuQmCC">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 :root{--bg:#0b0c10;--bg2:#101217;--bg3:#161920;--bg4:#1c1f28;--bg5:#22252f;--text:#e2e4e9;--white:#fff;--dim:#6b7080;--dim2:#484c58;--border:#1a1d25;--accent:#4f6ef7;--accent2:#3b5bdb;--sidebar-w:190px;--topbar-h:44px}
@@ -597,9 +593,7 @@ initMap();poll();setInterval(poll,350);
 </script>
 </body>
 </html>
-
 )WEBAPP";
-			return page;
-		}
-	}
+        return page;
+    }
 }
