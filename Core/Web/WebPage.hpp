@@ -647,6 +647,7 @@ var b=document.getElementById('conn-badge');b.innerHTML='Offline';b.style.border
 
 
 
+
 // ESP PREVIEW
 var espState={box:true,boxStyle:'full',boxThick:1.5,boxColor:'#ffffff',skeleton:true,skelColor:'#ffffff',skelOpacity:75,skelThick:1.5,hpPos:'bottom',arPos:'bottom',textPos:'bottom_center',textSize:14,hpColor:'#00ff63',arColor:'#87cffa',textColor:'#ffffff',hpOpacity:75,arOpacity:75,textOpacity:75};
 var espZoomLvl=100,espInited=false,espDirty=true;
@@ -665,54 +666,151 @@ lf:[-0.1,-0.74,0],rf:[0.1,-0.74,0]
 
 function hexRgba(hex,a){var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16);return 'rgba('+r+','+g+','+b+','+a+')'}
 
-function espAddLimb(g,s,e,rt,rb,mat){
+function espLimb(g,s,e,rt,rb,mat,seg){
 var sv=new THREE.Vector3(s[0],s[1],s[2]),ev=new THREE.Vector3(e[0],e[1],e[2]);
 var d=new THREE.Vector3().subVectors(ev,sv),ln=d.length();
-var geo=new THREE.CylinderGeometry(rt,rb,ln,12);
+var geo=new THREE.CylinderGeometry(rt,rb,ln,seg||16);
 var m=new THREE.Mesh(geo,mat);
 )WEBAPP4";
 
 			page += R"WEBAPP5(
 m.position.copy(sv).add(ev).multiplyScalar(0.5);
 m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());
-g.add(m);
+g.add(m);return m;
 }
-function espAddSph(g,x,y,z,r,mat,sc){
-var geo=new THREE.SphereGeometry(r,16,16);
-var m=new THREE.Mesh(geo,mat);
-m.position.set(x,y,z);
-if(sc)m.scale.set(sc[0],sc[1],sc[2]);
-g.add(m);
+function espSph(g,x,y,z,r,mat,sc){
+var geo=new THREE.SphereGeometry(r,20,16);
+var m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);
+if(sc)m.scale.set(sc[0],sc[1],sc[2]);g.add(m);return m;
+}
+function espBox(g,w,h,d,x,y,z,mat,rx,ry,rz){
+var geo=new THREE.BoxGeometry(w,h,d);
+var m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);
+if(rx)m.rotation.x=rx;if(ry)m.rotation.y=ry;if(rz)m.rotation.z=rz;
+g.add(m);return m;
+}
+function espLathe(g,pts,x,y,z,mat,seg,sx,sy,sz){
+var vs=pts.map(function(p){return new THREE.Vector2(p[0],p[1])});
+var geo=new THREE.LatheGeometry(vs,seg||24);
+var m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);
+if(sx)m.scale.set(sx,sy||1,sz||1);g.add(m);return m;
 }
 
 function buildPed3D(){
 var g=new THREE.Group();
-var skin=new THREE.MeshStandardMaterial({color:0xc4956a,roughness:0.65,metalness:0.02});
-var shirt=new THREE.MeshStandardMaterial({color:0xe8e8e8,roughness:0.85});
-var pants=new THREE.MeshStandardMaterial({color:0xc4b598,roughness:0.85});
-var hairM=new THREE.MeshStandardMaterial({color:0x1a1008,roughness:0.9});
+var skin=new THREE.MeshStandardMaterial({color:0xd4a574,roughness:0.55,metalness:0.01});
+var skinD=new THREE.MeshStandardMaterial({color:0xc49464,roughness:0.6,metalness:0.01});
+var shirt=new THREE.MeshStandardMaterial({color:0x2a2a2a,roughness:0.8});
+var pants=new THREE.MeshStandardMaterial({color:0x1e3050,roughness:0.85});
+var pantsD=new THREE.MeshStandardMaterial({color:0x162440,roughness:0.85});
+var hairM=new THREE.MeshStandardMaterial({color:0x1a1008,roughness:0.95});
 var shoeM=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.9});
-espAddSph(g,0,0.69,0,0.088,skin,[1,1.15,0.95]);
-espAddSph(g,0,0.74,-0.01,0.092,hairM,[1.05,0.65,1]);
-espAddLimb(g,[0,0.63,0],[0,0.59,0],0.033,0.038,skin);
-espAddLimb(g,[0,0.59,0],[0,0.35,0],0.135,0.105,shirt);
-espAddLimb(g,[0,0.35,0],[0,0.05,0],0.105,0.115,pants);
-espAddSph(g,-0.18,0.56,0,0.04,shirt);espAddSph(g,0.18,0.56,0,0.04,shirt);
-espAddLimb(g,[-0.18,0.54,0],[-0.3,0.31,0],0.036,0.031,skin);
-espAddLimb(g,[0.18,0.54,0],[0.3,0.31,0],0.036,0.031,skin);
-espAddSph(g,-0.3,0.31,0,0.033,skin);espAddSph(g,0.3,0.31,0,0.033,skin);
-espAddLimb(g,[-0.3,0.31,0],[-0.26,0.06,0],0.03,0.026,skin);
-espAddLimb(g,[0.3,0.31,0],[0.26,0.06,0],0.03,0.026,skin);
-espAddSph(g,-0.26,0.04,0,0.026,skin);espAddSph(g,0.26,0.04,0,0.026,skin);
-espAddSph(g,-0.08,0.03,0,0.052,pants);espAddSph(g,0.08,0.03,0,0.052,pants);
-espAddLimb(g,[-0.09,0.01,0],[-0.1,-0.34,0],0.055,0.043,pants);
-espAddLimb(g,[0.09,0.01,0],[0.1,-0.34,0],0.055,0.043,pants);
-espAddSph(g,-0.1,-0.34,0,0.044,pants);espAddSph(g,0.1,-0.34,0,0.044,pants);
-espAddLimb(g,[-0.1,-0.34,0],[-0.1,-0.71,0],0.038,0.03,skin);
-espAddLimb(g,[0.1,-0.34,0],[0.1,-0.71,0],0.038,0.03,skin);
-var sg=new THREE.BoxGeometry(0.07,0.05,0.12);
-var ls=new THREE.Mesh(sg,shoeM);ls.position.set(-0.1,-0.74,0.015);g.add(ls);
-var rs=new THREE.Mesh(sg.clone(),shoeM);rs.position.set(0.1,-0.74,0.015);g.add(rs);
+var soleM=new THREE.MeshStandardMaterial({color:0x333333,roughness:0.95});
+var eyeW=new THREE.MeshStandardMaterial({color:0xf8f8f8,roughness:0.3,metalness:0.0});
+var eyeI=new THREE.MeshStandardMaterial({color:0x3a2510,roughness:0.4,metalness:0.1});
+var lipM=new THREE.MeshStandardMaterial({color:0xb87060,roughness:0.6});
+
+// --- HEAD ---
+espLathe(g,[[0,-0.055],[0.075,-0.05],[0.085,-0.03],[0.088,0],[0.09,0.03],[0.085,0.06],[0.075,0.085],[0.055,0.1],[0.03,0.105],[0,0.108]],0,0.69,0,skin,28,1,1,0.92);
+// ears
+espSph(g,-0.088,0.695,0,0.018,skin,[0.5,0.9,0.7]);
+espSph(g,0.088,0.695,0,0.018,skin,[0.5,0.9,0.7]);
+// nose
+espLathe(g,[[0,-0.012],[0.012,-0.008],[0.015,0],[0.014,0.01],[0.008,0.018],[0,0.02]],0,0.672,0.08,skin,12,1,1,1);
+// eyes
+espSph(g,-0.032,0.705,0.074,0.013,eyeW,[1,0.75,0.5]);
+espSph(g,0.032,0.705,0.074,0.013,eyeW,[1,0.75,0.5]);
+espSph(g,-0.032,0.705,0.08,0.007,eyeI,[1,1,0.5]);
+espSph(g,0.032,0.705,0.08,0.007,eyeI,[1,1,0.5]);
+// eyebrows
+espBox(g,0.032,0.006,0.012,-0.032,0.722,0.078,hairM,0.15);
+espBox(g,0.032,0.006,0.012,0.032,0.722,0.078,hairM,0.15);
+// mouth
+espBox(g,0.03,0.005,0.01,0,0.66,0.08,lipM);
+// hair (short buzz cut style)
+espLathe(g,[[0,0.108],[0.035,0.107],[0.06,0.1],[0.08,0.085],[0.09,0.06],[0.092,0.03],[0.09,0.005]],0,0.69,0,hairM,28,1.03,1,0.95);
+
+// --- NECK ---
+espLimb(g,[0,0.635,0],[0,0.59,0],0.034,0.04,skin);
+
+// --- TORSO (shirt) - using lathe for V-shape ---
+espLathe(g,[[0,-0.14],[0.1,-0.135],[0.13,-0.1],[0.14,-0.05],[0.14,0],[0.135,0.05],[0.115,0.1],[0.085,0.12],[0.06,0.125],[0,0.128]],0,0.465,0,shirt,24,1,1,0.55);
+// collar detail
+espLimb(g,[0,0.588,0],[0,0.575,0],0.055,0.065,skin);
+// shirt hem
+espLimb(g,[0,0.34,0],[0,0.32,0],0.12,0.118,shirt);
+
+// --- BELT ---
+espLimb(g,[0,0.055,0],[0,0.035,0],0.115,0.113,new THREE.MeshStandardMaterial({color:0x2a2015,roughness:0.7}));
+// belt buckle
+espBox(g,0.025,0.018,0.01,0,0.045,0.11,new THREE.MeshStandardMaterial({color:0x888070,roughness:0.3,metalness:0.6}));
+
+// --- HIPS/PELVIS ---
+espLathe(g,[[0,-0.04],[0.1,-0.035],[0.115,-0.01],[0.115,0.01],[0.1,0.035],[0,0.04]],0,0.045,0,pants,24,1,1,0.55);
+
+// --- SHOULDERS ---
+espSph(g,-0.175,0.56,0,0.048,shirt,[1,0.85,0.9]);
+espSph(g,0.175,0.56,0,0.048,shirt,[1,0.85,0.9]);
+
+// --- UPPER ARMS ---
+espLimb(g,[-0.19,0.54,0],[-0.28,0.33,0],0.04,0.035,shirt);
+espLimb(g,[0.19,0.54,0],[0.28,0.33,0],0.04,0.035,shirt);
+// shirt sleeve hem
+espLimb(g,[-0.245,0.41,0],[-0.255,0.39,0],0.04,0.038,shirt);
+espLimb(g,[0.245,0.41,0],[0.255,0.39,0],0.04,0.038,shirt);
+
+// --- FOREARMS (skin) ---
+espLimb(g,[-0.28,0.33,0],[-0.27,0.31,0],0.033,0.034,skin);
+espSph(g,-0.29,0.31,0,0.034,skin);espSph(g,0.29,0.31,0,0.034,skin);
+espLimb(g,[-0.29,0.31,0],[-0.26,0.08,0],0.032,0.024,skin);
+espLimb(g,[0.28,0.33,0],[0.27,0.31,0],0.033,0.034,skin);
+espLimb(g,[0.29,0.31,0],[0.26,0.08,0],0.032,0.024,skin);
+
+// --- WRISTS ---
+espSph(g,-0.26,0.06,0,0.024,skin);espSph(g,0.26,0.06,0,0.024,skin);
+
+// --- HANDS ---
+espBox(g,0.04,0.055,0.02,-0.255,0.03,0,skin);
+espBox(g,0.04,0.055,0.02,0.255,0.03,0,skin);
+// fingers (4 + thumb each hand)
+var fi=[-0.015,-0.005,0.005,0.015];
+for(var i=0;i<4;i++){
+espBox(g,0.008,0.028,0.012,-0.255+fi[i],0.0,0,skinD);
+espBox(g,0.008,0.028,0.012,0.255-fi[i],0.0,0,skinD);
+}
+// thumbs
+espBox(g,0.012,0.025,0.014,-0.278,0.035,0.005,skinD,0,0,0.4);
+espBox(g,0.012,0.025,0.014,0.278,0.035,0.005,skinD,0,0,-0.4);
+
+// --- UPPER LEGS ---
+espSph(g,-0.065,0.02,0,0.058,pants,[1,0.7,0.85]);
+espSph(g,0.065,0.02,0,0.058,pants,[1,0.7,0.85]);
+espLimb(g,[-0.08,0.0,0],[-0.09,-0.34,0],0.058,0.046,pants);
+espLimb(g,[0.08,0.0,0],[0.09,-0.34,0],0.058,0.046,pants);
+
+// --- KNEES ---
+espSph(g,-0.09,-0.34,0,0.047,pants);espSph(g,0.09,-0.34,0,0.047,pants);
+
+// --- LOWER LEGS (jeans continue) ---
+espLimb(g,[-0.09,-0.34,0],[-0.09,-0.65,0],0.044,0.035,pants);
+espLimb(g,[0.09,-0.34,0],[0.09,-0.65,0],0.044,0.035,pants);
+// jeans cuff
+espLimb(g,[-0.09,-0.64,0],[-0.09,-0.67,0],0.037,0.036,pantsD);
+espLimb(g,[0.09,-0.64,0],[0.09,-0.67,0],0.037,0.036,pantsD);
+
+// --- SHOES (sneaker style) ---
+// ankle
+espSph(g,-0.09,-0.68,0,0.035,shoeM);espSph(g,0.09,-0.68,0,0.035,shoeM);
+// shoe body
+espBox(g,0.065,0.04,0.13,-0.09,-0.72,0.015,shoeM);
+espBox(g,0.065,0.04,0.13,0.09,-0.72,0.015,shoeM);
+// sole
+espBox(g,0.068,0.012,0.138,-0.09,-0.742,0.018,soleM);
+espBox(g,0.068,0.012,0.138,0.09,-0.742,0.018,soleM);
+// toe cap
+espSph(g,-0.09,-0.73,0.075,0.033,shoeM,[1,0.5,0.6]);
+espSph(g,0.09,-0.73,0.075,0.033,shoeM,[1,0.5,0.6]);
+
 return g;
 }
 
@@ -856,6 +954,9 @@ var h='';
 h+='<div class="esp-section"><div class="esp-section-header"><div class="esp-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div class="esp-section-info"><div class="esp-section-name">Box</div><div class="esp-section-desc">Style, thickness and color</div></div><label class="switch" style="margin-left:auto"><input type="checkbox" '+(espState.box?'checked':'')+' onchange="espState.box=this.checked;document.getElementById(\'esp-pv-box\').checked=this.checked;espDirty=true"><span class="sw-s"></span></label></div>';
 h+='<div class="esp-row"><span class="esp-lbl">Style</span><select class="esp-select" onchange="espState.boxStyle=this.value;espDirty=true"><option value="full"'+(espState.boxStyle==='full'?' selected':'')+'>Full</option><option value="corner"'+(espState.boxStyle==='corner'?' selected':'')+'>Corner</option></select></div>';
 h+=espSlider('Thickness','boxThick',0.5,5,0.5,espState.boxThick);
+)WEBAPP5";
+
+			page += R"WEBAPP6(
 h+=espCPick('Color','boxColor',espState.boxColor);
 h+='</div>';
 h+='<div class="esp-section"><div class="esp-section-header"><div class="esp-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="15"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="12" y1="15" x2="8" y2="21"/><line x1="12" y1="15" x2="16" y2="21"/></svg></div><div class="esp-section-info"><div class="esp-section-name">Skeleton</div><div class="esp-section-desc">Bone lines and joint dots</div></div><label class="switch" style="margin-left:auto"><input type="checkbox" '+(espState.skeleton?'checked':'')+' onchange="espState.skeleton=this.checked;espDirty=true"><span class="sw-s"></span></label></div>';
@@ -894,7 +995,7 @@ initMap();poll();setInterval(poll,350);
 </body>
 </html>
 
-)WEBAPP5";
+)WEBAPP6";
 
 			return page;
 		}
