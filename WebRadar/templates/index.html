@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="description" content="p4m Telemetry & Cartography Console — Authentic GTA V interactive map, real-time session radar, and remote configuration interface." />
+  <meta name="theme-color" content="#0b0c0e" />
+  <title>p4m — GTA V Cartography &amp; Telemetry Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/vendor/leaflet.css" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- ===================================================================== -->
+  <!-- TOP APPLICATION HEADER                                                -->
+  <!-- ===================================================================== -->
+  <header class="app-header" role="banner">
+    <div class="header-left">
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+            <line x1="12" y1="22" x2="12" y2="15.5"></line>
+            <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+          </svg>
+        </span>
+        <span class="brand-name">p4m</span>
+        <span class="brand-divider" aria-hidden="true">/</span>
+        <span class="brand-title">San Andreas Cartography &amp; Telemetry</span>
+      </div>
+
+      <div class="telemetry-status" id="conn-pill" role="status" aria-live="polite">
+        <span class="status-indicator" id="conn-dot"></span>
+        <span class="status-label" id="conn-text">Initializing link...</span>
+      </div>
+    </div>
+
+    <nav class="primary-nav" aria-label="Workspace views">
+      <button type="button" class="nav-tab active" data-tab="map" onclick="switchTab('map', this)" aria-current="page">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+        <span>World Map</span>
+        <kbd class="nav-kbd">1</kbd>
+      </button>
+
+      <button type="button" class="nav-tab" data-tab="config" onclick="switchTab('config', this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="21" x2="4" y2="14"></line>
+          <line x1="4" y1="10" x2="4" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12" y2="3"></line>
+          <line x1="20" y1="21" x2="20" y2="16"></line>
+          <line x1="20" y1="12" x2="20" y2="3"></line>
+          <line x1="1" y1="14" x2="7" y2="14"></line>
+          <line x1="9" y1="8" x2="15" y2="8"></line>
+          <line x1="17" y1="16" x2="23" y2="16"></line>
+        </svg>
+        <span>Parameters</span>
+        <kbd class="nav-kbd">2</kbd>
+      </button>
+
+      <button type="button" class="nav-tab" data-tab="admins" onclick="switchTab('admins', this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>Watchlist</span>
+        <span class="nav-counter alert" id="nav-admin-count">0</span>
+      </button>
+
+      <button type="button" class="nav-tab" data-tab="entities" onclick="switchTab('entities', this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Entities</span>
+        <span class="nav-counter" id="nav-entity-count">0</span>
+      </button>
+    </nav>
+
+    <div class="header-right">
+      <div class="cursor-readout" aria-label="Cursor GTA V World Coordinates">
+        <span class="coord-tag">CURSOR</span>
+        <span class="coord-mono" id="cursor-coords">X: 0.0 · Y: 0.0</span>
+      </div>
+
+      <button type="button" class="btn-icon mobile-drawer-toggle" id="btn-toggle-sidebar" onclick="toggleInspectorSidebar()" aria-label="Toggle Inspector Panel" title="Toggle Inspector Panel">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="15" y1="3" x2="15" y2="21"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- PRIORITY ADMIN DETECTION BAR (VISIBLE ONLY WHEN FLAGGED IN SESSION)   -->
+  <!-- ===================================================================== -->
+  <div class="priority-banner" id="admin-alert-bar" role="alert" style="display: none;">
+    <div class="banner-inner">
+      <span class="banner-dot"></span>
+      <strong class="banner-title">WATCHLIST ENTITY DETECTED IN SESSION</strong>
+      <span class="banner-sep">—</span>
+      <span class="banner-detail" id="admin-alert-names">None</span>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN WORKSPACE                                                        -->
+  <!-- ===================================================================== -->
+  <main class="workspace">
+
+    <!-- =================================================================== -->
+    <!-- VIEW 1: AUTHENTIC GTA V WORLD MAP & INSPECTOR                       -->
+    <!-- =================================================================== -->
+    <section id="tab-map" class="view-panel active" aria-label="Interactive GTA V Map">
+      <div class="map-workspace">
+
+        <!-- Authentic GTA V Leaflet Map Container -->
+        <div class="map-stage" id="map-viewport">
+          <div id="gta-leaflet-map" class="gta-leaflet-container" role="application" aria-label="Authentic Grand Theft Auto V World Map"></div>
+
+          <!-- Top-Left Map Style & Layer Bar -->
+          <div class="map-toolbar top-left">
+            <div class="segmented-control" role="group" aria-label="GTA V Map Cartography Style">
+              <button type="button" class="seg-btn active" id="style-btn-atlas" onclick="setMapStyle('atlas')">
+                Atlas
+              </button>
+              <button type="button" class="seg-btn" id="style-btn-satellite" onclick="setMapStyle('satellite')">
+                Satellite
+              </button>
+              <button type="button" class="seg-btn" id="style-btn-grid" onclick="setMapStyle('grid')">
+                Topo Grid
+              </button>
+            </div>
+
+            <div class="layer-bar" role="group" aria-label="Map Overlay Layers">
+              <button type="button" class="layer-pill active" id="chip-pois" onclick="toggleLayer('pois')" title="Toggle Verified GTA V Landmarks">
+                <span class="dot-indicator poi"></span>
+                <span>Landmarks</span>
+                <b id="cnt-pois">24</b>
+              </button>
+              <button type="button" class="layer-pill active" id="chip-admins" onclick="toggleLayer('admins')" title="Toggle Flagged Watchlist Players">
+                <span class="dot-indicator admin"></span>
+                <span>Watchlist</span>
+                <b id="cnt-admins">0</b>
+              </button>
+              <button type="button" class="layer-pill active" id="chip-players" onclick="toggleLayer('players')" title="Toggle Session Players">
+                <span class="dot-indicator player"></span>
+                <span>Players</span>
+                <b id="cnt-players">0</b>
+              </button>
+              <button type="button" class="layer-pill active" id="chip-vehicles" onclick="toggleLayer('vehicles')" title="Toggle Session Vehicles">
+                <span class="dot-indicator vehicle"></span>
+                <span>Vehicles</span>
+                <b id="cnt-vehicles">0</b>
+              </button>
+              <button type="button" class="layer-pill active" id="chip-blips" onclick="toggleLayer('blips')" title="Toggle Native Game Blips">
+                <span class="dot-indicator blip"></span>
+                <span>Game Blips</span>
+                <b id="cnt-blips">0</b>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom-Left Camera & Navigation Controls -->
+          <div class="map-toolbar bottom-left">
+            <div class="control-cluster">
+              <button type="button" class="ctrl-btn" onclick="zoomMapIn()" aria-label="Zoom in" title="Zoom in (+)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+              <button type="button" class="ctrl-btn" onclick="zoomMapOut()" aria-label="Zoom out" title="Zoom out (-)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+              <button type="button" class="ctrl-btn" onclick="recenterOnLocal()" aria-label="Center on local player" title="Center on local player">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+              <button type="button" class="ctrl-btn" onclick="resetFullView()" aria-label="Reset full San Andreas view" title="Reset full San Andreas view">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+              </button>
+              <button type="button" class="ctrl-btn text-btn" id="chip-follow" onclick="toggleFollowLocal()" title="Lock camera to local player">
+                <span>Follow:</span>
+                <b id="lbl-follow">OFF</b>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Inspector Sidebar -->
+        <aside class="inspector-sidebar" id="inspector-sidebar" aria-label="Telemetry and Location Inspector">
+
+          <!-- Block 1: Local Player Telemetry & Waypoint Dispatch -->
+          <div class="inspector-section">
+            <div class="section-header">
+              <h2 class="section-title">Telemetry Readout</h2>
+              <span class="region-badge" id="hud-zone">San Andreas</span>
+            </div>
+
+            <div class="telemetry-grid">
+              <div class="metric-cell">
+                <span class="metric-label">POS X</span>
+                <span class="metric-val" id="hud-x">—</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">POS Y</span>
+                <span class="metric-val" id="hud-y">—</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">POS Z</span>
+                <span class="metric-val" id="hud-z">—</span>
+              </div>
+            </div>
+
+            <div class="vitals-grid">
+              <div class="vital-item">
+                <div class="vital-top">
+                  <span class="vital-label">HEALTH</span>
+                  <span class="vital-num" id="hud-hp">—</span>
+                </div>
+                <div class="meter-track"><div id="bar-hp" class="meter-fill hp" style="width: 0%;"></div></div>
+              </div>
+              <div class="vital-item">
+                <div class="vital-top">
+                  <span class="vital-label">ARMOR</span>
+                  <span class="vital-num" id="hud-arm">—</span>
+                </div>
+                <div class="meter-track"><div id="bar-arm" class="meter-fill arm" style="width: 0%;"></div></div>
+              </div>
+            </div>
+
+            <!-- Selected Map Waypoint Card -->
+            <div class="waypoint-box" id="waypoint-card" style="display: none;">
+              <div class="waypoint-header">
+                <span class="waypoint-title" id="wp-label">SELECTED WAYPOINT</span>
+                <button type="button" class="btn-close" onclick="clearWaypoint()" aria-label="Clear waypoint">✕</button>
+              </div>
+              <div class="waypoint-coords" id="wp-coords">X: 0.0, Y: 0.0, Z: 35.0</div>
+              <div class="waypoint-actions">
+                <button type="button" class="btn-primary btn-full" onclick="teleportToSelectedWaypoint()">
+                  Dispatch Teleport
+                </button>
+                <button type="button" class="btn-secondary" onclick="copyWaypointCoords()" title="Copy coordinates">
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Block 2: Verified GTA V Locations Directory (Searchable) -->
+          <div class="inspector-section">
+            <div class="section-header">
+              <h2 class="section-title">GTA V Locations</h2>
+              <span class="section-meta" id="poi-count-label">24 verified</span>
+            </div>
+
+            <div class="search-field">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="search" id="poi-search" placeholder="Filter Los Santos &amp; Blaine County..." oninput="renderLandmarkDirectory()" aria-label="Filter GTA V locations" />
+            </div>
+
+            <div class="landmark-list" id="landmark-directory" role="list"></div>
+          </div>
+
+          <!-- Block 3: Quick Overlay Controls -->
+          <div class="inspector-section">
+            <div class="section-header">
+              <h2 class="section-title">Quick Directives</h2>
+              <span class="section-meta">Live Sync</span>
+            </div>
+            <div class="switch-group">
+              <label class="switch-row">
+                <span class="switch-text">Watchlist Admin Highlight</span>
+                <input type="checkbox" id="quick-esp_admin" onchange="setConfigValue('esp_admin', this.checked)" checked />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Dynamic Spectrum Cycle</span>
+                <input type="checkbox" id="quick-esp_admin_rainbow" onchange="setConfigValue('esp_admin_rainbow', this.checked)" checked />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Bounding Box Overlay</span>
+                <input type="checkbox" id="quick-esp_box" onchange="setConfigValue('esp_box', this.checked)" checked />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Skeletal Joint Rig</span>
+                <input type="checkbox" id="quick-esp_skeleton" onchange="setConfigValue('esp_skeleton', this.checked)" checked />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Vehicle Telemetry Overlay</span>
+                <input type="checkbox" id="quick-vehesp_enabled" onchange="setConfigValue('vehesp_enabled', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Local Invulnerability</span>
+                <input type="checkbox" id="quick-godmode" onchange="setConfigValue('godmode', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Block 4: Live Session Proximity Feed -->
+          <div class="inspector-section grow">
+            <div class="section-header">
+              <h2 class="section-title">Session Proximity</h2>
+              <span class="section-meta" id="hud-admins">0 flagged</span>
+            </div>
+            <div class="proximity-list" id="proximity-list"></div>
+          </div>
+
+        </aside>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 2: RUNTIME PARAMETERS & CONFIGURATION                          -->
+    <!-- =================================================================== -->
+    <section id="tab-config" class="view-panel" aria-label="Runtime Parameters">
+      <div class="page-scroll">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Runtime Parameters</h1>
+            <p class="page-subtitle">Changes synchronize immediately with the local C++ process (<code>127.0.0.1:8080</code>) or queue for Render Cloud Sync (<code>/api/sync</code>).</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <!-- Column 1: Visual Telemetry -->
+          <div class="settings-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Visual Overlay Pipeline</h2>
+                <p class="card-desc">Entity bounding geometry, skeletal joints, and watchlist indicators.</p>
+              </div>
+              <span class="tag-pill">ESP</span>
+            </div>
+
+            <div class="switch-group">
+              <label class="switch-row">
+                <span class="switch-text">Master Visual Pipeline</span>
+                <input type="checkbox" id="cfg-esp_enabled" onchange="setConfigValue('esp_enabled', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Watchlist Admin Highlight (&ldquo;Admin&rdquo; Tag)</span>
+                <input type="checkbox" id="cfg-esp_admin" onchange="setConfigValue('esp_admin', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Admin Spectrum Cycle</span>
+                <input type="checkbox" id="cfg-esp_admin_rainbow" onchange="setConfigValue('esp_admin_rainbow', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">2D Bounding Box</span>
+                <input type="checkbox" id="cfg-esp_box" onchange="setConfigValue('esp_box', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Bone Skeleton Rig</span>
+                <input type="checkbox" id="cfg-esp_skeleton" onchange="setConfigValue('esp_skeleton', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Origin Snaplines</span>
+                <input type="checkbox" id="cfg-esp_snaplines" onchange="setConfigValue('esp_snaplines', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Network Identifiers (Usernames)</span>
+                <input type="checkbox" id="cfg-esp_names" onchange="setConfigValue('esp_names', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Equipped Weapon Readout</span>
+                <input type="checkbox" id="cfg-esp_weapon" onchange="setConfigValue('esp_weapon', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Cranial Target Indicator</span>
+                <input type="checkbox" id="cfg-esp_headcircle" onchange="setConfigValue('esp_headcircle', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Health &amp; Armor Gauges</span>
+                <input type="checkbox" id="cfg-esp_health" onchange="setConfigValue('esp_health', this.checked); setConfigValue('esp_armor', this.checked);" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Distance Readout</span>
+                <input type="checkbox" id="cfg-esp_distance" onchange="setConfigValue('esp_distance', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Filter Ambient Pedestrians (NPCs)</span>
+                <input type="checkbox" id="cfg-esp_ignore_npcs" onchange="setConfigValue('esp_ignore_npcs', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Filter Incapacitated Entities</span>
+                <input type="checkbox" id="cfg-esp_ignore_dead" onchange="setConfigValue('esp_ignore_dead', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Vehicle Telemetry Overlay</span>
+                <input type="checkbox" id="cfg-vehesp_enabled" onchange="setConfigValue('vehesp_enabled', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+
+            <div class="range-control">
+              <div class="range-header">
+                <label for="cfg-esp_max_distance">Render Cull Distance</label>
+                <span class="range-val" id="val-esp_max_distance">250m</span>
+              </div>
+              <input type="range" min="50" max="1500" value="250" id="cfg-esp_max_distance"
+                oninput="document.getElementById('val-esp_max_distance').innerText = this.value + 'm'"
+                onchange="setConfigValue('esp_max_distance', this.value)" />
+            </div>
+          </div>
+
+          <!-- Column 2: Vector Solver & Targeting -->
+          <div class="settings-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Targeting &amp; Vector Solver</h2>
+                <p class="card-desc">View angle interpolation, field-of-view bounds, and trigger automation.</p>
+              </div>
+              <span class="tag-pill">VECTOR</span>
+            </div>
+
+            <div class="switch-group">
+              <label class="switch-row">
+                <span class="switch-text">Enable View Angle Aimbot</span>
+                <input type="checkbox" id="cfg-aimbot_enabled" onchange="setConfigValue('aimbot_enabled', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Line-of-Sight Visibility Check</span>
+                <input type="checkbox" id="cfg-aimbot_visible" onchange="setConfigValue('aimbot_visible', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Enable Silent Vector Redirection</span>
+                <input type="checkbox" id="cfg-silentaim_enabled" onchange="setConfigValue('silentaim_enabled', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Enable Automated TriggerBot</span>
+                <input type="checkbox" id="cfg-triggerbot_enabled" onchange="setConfigValue('triggerbot_enabled', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+
+            <div class="range-control">
+              <div class="range-header">
+                <label for="cfg-aimbot_fov">Aimbot Angular Radius (FOV)</label>
+                <span class="range-val" id="val-aimbot_fov">180°</span>
+              </div>
+              <input type="range" min="10" max="360" value="180" id="cfg-aimbot_fov"
+                oninput="document.getElementById('val-aimbot_fov').innerText = this.value + '°'"
+                onchange="setConfigValue('aimbot_fov', this.value)" />
+            </div>
+
+            <div class="range-control">
+              <div class="range-header">
+                <label for="cfg-aimbot_speed">Interpolation Smoothing Factor</label>
+                <span class="range-val" id="val-aimbot_speed">12</span>
+              </div>
+              <input type="range" min="1" max="50" value="12" id="cfg-aimbot_speed"
+                oninput="document.getElementById('val-aimbot_speed').innerText = this.value"
+                onchange="setConfigValue('aimbot_speed', this.value)" />
+            </div>
+
+            <div class="range-control">
+              <div class="range-header">
+                <label for="cfg-silentaim_fov">Silent Vector FOV</label>
+                <span class="range-val" id="val-silentaim_fov">40°</span>
+              </div>
+              <input type="range" min="5" max="180" value="40" id="cfg-silentaim_fov"
+                oninput="document.getElementById('val-silentaim_fov').innerText = this.value + '°'"
+                onchange="setConfigValue('silentaim_fov', this.value)" />
+            </div>
+          </div>
+
+          <!-- Column 3: Local Entity & Ballistics -->
+          <div class="settings-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Local Entity &amp; Ballistics</h2>
+                <p class="card-desc">Kinematics overrides, movement multipliers, and weapon stability.</p>
+              </div>
+              <span class="tag-pill">LOCAL</span>
+            </div>
+
+            <div class="switch-group">
+              <label class="switch-row">
+                <span class="switch-text">Invulnerability (GodMode)</span>
+                <input type="checkbox" id="cfg-godmode" onchange="setConfigValue('godmode', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Free-Camera Kinematics (NoClip)</span>
+                <input type="checkbox" id="cfg-noclip" onchange="setConfigValue('noclip', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Enhanced Sprint Velocity</span>
+                <input type="checkbox" id="cfg-fastrun" onchange="setConfigValue('fastrun', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Unlimited Stamina Pool</span>
+                <input type="checkbox" id="cfg-stamina" onchange="setConfigValue('stamina', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Unlimited Ammunition</span>
+                <input type="checkbox" id="cfg-ammo" onchange="setConfigValue('ammo', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Zero Recoil Impulse</span>
+                <input type="checkbox" id="cfg-norecoil" onchange="setConfigValue('norecoil', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+              <label class="switch-row">
+                <span class="switch-text">Zero Ballistic Spread</span>
+                <input type="checkbox" id="cfg-nospread" onchange="setConfigValue('nospread', this.checked)" />
+                <span class="switch-ui"></span>
+              </label>
+            </div>
+
+            <div class="range-control">
+              <div class="range-header">
+                <label for="cfg-noclip_speed">NoClip Translation Speed</label>
+                <span class="range-val" id="val-noclip_speed">2.0</span>
+              </div>
+              <input type="range" min="1" max="20" step="0.5" value="2.0" id="cfg-noclip_speed"
+                oninput="document.getElementById('val-noclip_speed').innerText = this.value"
+                onchange="setConfigValue('noclip_speed', this.value)" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 3: WATCHLIST & STAFF DETECTION                                 -->
+    <!-- =================================================================== -->
+    <section id="tab-admins" class="view-panel" aria-label="Watchlist and Staff Detection">
+      <div class="page-scroll">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Watchlist &amp; Staff Detection</h1>
+            <p class="page-subtitle">Entities matching watchlist identifiers or elevated invulnerability heuristics are flagged across the in-game overlay and GTA V map.</p>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Identifier Matching Rules</h2>
+              <p class="card-desc">Add a substring or exact player handle to flag as an administrator in real time.</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <input type="text" id="admin-input" class="text-input" placeholder="Enter username or tag (e.g. txadmin, staff, mod)..." aria-label="Admin identifier" onkeydown="if(event.key==='Enter') addAdminWatch()" />
+            <button type="button" class="btn-primary" onclick="addAdminWatch()">Add Identifier</button>
+          </div>
+
+          <div class="chip-collection" id="watchlist-chips" aria-label="Active watchlist patterns"></div>
+        </div>
+
+        <div class="settings-card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Flagged Session Entities</h2>
+              <p class="card-desc">Live telemetry for watchlist matches detected in the current FiveM session.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Classification</th>
+                  <th>Identifier</th>
+                  <th>Net ID</th>
+                  <th>World Coordinates (X, Y, Z)</th>
+                  <th>Distance</th>
+                  <th>Vitals</th>
+                  <th>Equipped</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admins-table-body">
+                <tr><td colspan="8" class="empty-cell">No flagged entities detected in the current session.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 4: SESSION ENTITIES & TELEPORT DIRECTORY                       -->
+    <!-- =================================================================== -->
+    <section id="tab-entities" class="view-panel" aria-label="Session Entities Directory">
+      <div class="page-scroll">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Session Entities Directory</h1>
+            <p class="page-subtitle">Real-time player roster streamed from the attached FiveM process. Fake or simulated players are never generated.</p>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Player Identifier</th>
+                  <th>Net ID</th>
+                  <th>World Coordinates</th>
+                  <th>Distance</th>
+                  <th>Health</th>
+                  <th>Armor</th>
+                  <th>Weapon</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="entities-table-body">
+                <tr><td colspan="9" class="empty-cell">No live process attached. Start p4m.exe or enable Render Cloud Sync to stream session entities.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/vendor/leaflet.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

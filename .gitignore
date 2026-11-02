@@ -1,0 +1,46 @@
+# Build output
+x64/
+Debug/
+Release/
+*.obj
+*.pdb
+*.exe
+*.dll
+*.lib
+*.exp
+*.ilk
+*.iobj
+*.ipdb
+*.log
+
+# NuGet
+packages/
+nuget.exe
+*.nupkg
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.sln.docstates
+src.vcxproj.user
+
+# WebRadar Python cache
+WebRadar/__pycache__/
+WebRadar.backup/__pycache__/
+__pycache__/
+*.pyc
+
+# Cloudflare tunnel binary
+**/cloudflared.exe
+
+# WebRadar backup
+WebRadar.backup/
+
+# OS files
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# p4m build output
+p4m/

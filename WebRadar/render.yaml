@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: p4m-gta-web-radar
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 8
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: P4M_API_KEY
+        value: p4m-secret-key
+      - key: P4M_LOCAL_CPP_URL
+        value: http://127.0.0.1:8080
