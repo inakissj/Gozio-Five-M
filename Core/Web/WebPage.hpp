@@ -13,457 +13,508 @@ namespace Core
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>p4m Controller</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>p4m</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
-:root{--bg:#0a0b0f;--bg2:#111318;--bg3:#181b22;--bg4:#1e222b;--accent:#38bdf8;--accent2:#0ea5e9;--red:#ef4444;--green:#22c55e;--purple:#a855f7;--gold:#f59e0b;--text:#e8eaed;--dim:#6b7280;--border:#252830;--sidebar:56px;--header:48px;--footer:40px}
+:root{--bg:#0a0b0f;--bg2:#111318;--bg3:#181b22;--bg4:#1e2029;--bg5:#252830;--text:#e8eaed;--white:#ffffff;--dim:#62656e;--dim2:#44474f;--border:#1c1f27;--border2:#252830;--sidebar:52px;--header:40px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:13px}
-/* LAYOUT */
-.app{display:flex;flex:1;overflow:hidden}
-.sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;z-index:10;flex-shrink:0}
-.sidebar .logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#fff;margin-bottom:12px;letter-spacing:-0.5px}
-.stab{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);transition:all .15s;border:none;background:transparent}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;-webkit-font-smoothing:antialiased;font-size:12.5px}
+.sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:1px;z-index:10;flex-shrink:0}
+.logo{width:30px;height:30px;border-radius:6px;background:var(--white);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:9px;color:var(--bg);margin-bottom:8px;letter-spacing:-.3px;cursor:default}
+.stab{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);transition:all .15s;border:none;background:0 0;position:relative}
 .stab:hover{background:var(--bg3);color:var(--text)}
-.stab.active{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(56,189,248,.3)}
-.stab svg{width:18px;height:18px;fill:currentColor}
-.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
-/* HEADER */
-.top-bar{height:var(--header);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
-.top-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);font-weight:600}
-.top-right{display:flex;align-items:center;gap:16px}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:6px}
-.sub-label{font-size:11px;color:var(--dim);letter-spacing:.5px}
-.sub-label b{color:var(--text)}
-/* CONTENT */
+.stab.active{background:var(--white);color:var(--bg)}
+.stab svg{width:16px;height:16px}
+.stab .badge{position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:2px solid var(--bg2);display:none}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:var(--header);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}
+.topbar-left{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.conn{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--dim)}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:#22c55e}
+.sub-exp{font-size:9px;color:var(--dim);letter-spacing:.3px}
+.sub-exp b{color:var(--text);font-weight:700}
 .content{flex:1;overflow:hidden;position:relative}
 .page{display:none;width:100%;height:100%;flex-direction:column;overflow:hidden}
 .page.active{display:flex}
-/* SUBTABS */
-.subtabs{display:flex;gap:6px;padding:14px 20px 10px;flex-shrink:0}
-.subtab{background:var(--bg3);border:1px solid var(--border);color:var(--dim);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
-.subtab:hover{color:var(--text);border-color:var(--accent)}
-.subtab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-/* PANELS */
-.panels{display:flex;flex:1;gap:16px;padding:0 20px 14px;overflow-y:auto}
-.panel{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
-.panel-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-/* CONTROLS */
-.ctrl{display:flex;align-items:center;justify-content:space-between;padding:7px 0;min-height:34px}
-.ctrl-label{font-size:12.5px;color:var(--text);font-weight:500}
-.ctrl-warn{font-size:10px;color:var(--red);opacity:.7;font-weight:400;margin-left:4px}
-.switch{position:relative;width:38px;height:20px;flex-shrink:0}
+.subtabs{display:flex;gap:3px;padding:10px 16px 6px;flex-shrink:0}
+.subtab{background:var(--bg3);border:1px solid var(--border);color:var(--dim);padding:4px 12px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;transition:all .12s;letter-spacing:.2px}
+.subtab:hover{color:var(--text);border-color:var(--dim2)}
+.subtab.active{background:var(--white);color:var(--bg);border-color:var(--white)}
+.panels{display:flex;flex:1;gap:10px;padding:0 16px 10px;overflow-y:auto}
+.panel{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:0;overflow-y:auto}
+.ptitle{font-size:8px;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim);font-weight:700;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:5px 0;min-height:28px}
+.clbl{font-size:11.5px;color:var(--text);font-weight:500;display:flex;align-items:center;gap:4px}
+.cwarn{font-size:8px;color:#ef4444;font-weight:700;opacity:.7}
+.switch{position:relative;width:32px;height:16px;flex-shrink:0}
 .switch input{opacity:0;width:0;height:0;position:absolute}
-.slider{position:absolute;cursor:pointer;inset:0;background:#2a2d36;border-radius:20px;transition:.2s}
-.slider::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
-input:checked+.slider{background:var(--accent)}
-input:checked+.slider::before{transform:translateX(18px)}
-.range-row{padding:6px 0}
-.range-head{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
-.range-head span{color:var(--dim)}
-.range-head b{color:var(--accent);font-weight:600}
-input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:#2a2d36;border-radius:4px;outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid #fff;cursor:pointer}
-/* TABLE */
-.dtable{width:100%;border-collapse:collapse;font-size:12px}
-.dtable th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--border)}
-.dtable td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text)}
-.dtable tr:hover td{background:rgba(56,189,248,.04)}
-.badge-admin{background:rgba(239,68,68,.15);color:var(--red);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;border:1px solid rgba(239,68,68,.3)}
-.badge-player{color:var(--accent);font-size:11px;font-weight:600}
-.tbtn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-weight:600;transition:all .15s}
-.tbtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-.tbtn-red{border-color:rgba(239,68,68,.4)}
-.tbtn-red:hover{background:var(--red);border-color:var(--red)}
-/* FOOTER */
-footer{height:var(--footer);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
-.user-info{display:flex;align-items:center;gap:10px}
-.avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple))}
-.uname{font-size:12px;font-weight:600}
-.ftime{font-size:11px;color:var(--dim)}
+.sw-s{position:absolute;cursor:pointer;inset:0;background:var(--bg4);border-radius:16px;transition:.15s;border:1px solid var(--border)}
+.sw-s::before{content:'';position:absolute;height:10px;width:10px;left:2px;bottom:2px;background:var(--dim);border-radius:50%;transition:.15s}
+input:checked+.sw-s{background:var(--white);border-color:var(--white)}
+input:checked+.sw-s::before{transform:translateX(16px);background:var(--bg)}
+.rng{padding:4px 0}
+.rng-h{display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px}
+.rng-h span{color:var(--dim)}
+.rng-h b{color:var(--white);font-weight:700;font-family:Consolas,monospace;font-size:10px}
+input[type=range]{width:100%;height:2px;-webkit-appearance:none;appearance:none;background:var(--bg4);border-radius:2px;outline:0;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--white);cursor:pointer}
+.info-text{color:var(--dim);font-size:11px;padding:6px 0;line-height:1.5}
+.dtable{width:100%;border-collapse:collapse;font-size:11px}
+.dtable th{text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--dim);font-weight:700;padding:5px 6px;border-bottom:1px solid var(--border)}
+.dtable td{padding:5px 6px;border-bottom:1px solid var(--border);color:var(--text)}
+.dtable tr:hover td{background:rgba(255,255,255,.02)}
+.badge-admin{color:#ef4444;font-size:9px;font-weight:700}
+.badge-player{color:var(--dim);font-size:9px;font-weight:600}
+.tbtn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:2px 8px;border-radius:3px;font-size:9px;cursor:pointer;font-weight:600;transition:all .12s}
+.tbtn:hover{background:var(--white);color:var(--bg);border-color:var(--white)}
+.tp-list{display:flex;flex-direction:column;gap:3px}
+.tp-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px}
+.tp-name{font-weight:600;font-size:11.5px}
+.tp-coords{font-size:9px;color:var(--dim);font-family:Consolas,monospace}
+.tp-go{background:var(--white);color:var(--bg);border:none;padding:3px 12px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;transition:all .12s}
+.tp-go:hover{opacity:.85}
+.btn-action{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;width:100%;transition:all .12s;margin-top:4px}
+.btn-action:hover{background:var(--white);color:var(--bg);border-color:var(--white)}
+footer{height:28px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0}
+.uinfo{display:flex;align-items:center;gap:6px}
+.avatar{width:16px;height:16px;border-radius:50%;background:var(--dim2)}
+.uname{font-size:10px;font-weight:600;color:var(--dim)}
+.ftime{font-size:9px;color:var(--dim2)}
 /* MAP */
-#map-wrap{position:relative;flex:1;background:#060810;overflow:hidden}
-#map-canvas{width:100%;height:100%;display:block;cursor:crosshair}
-.map-hud{position:absolute;top:12px;left:12px;z-index:5;background:rgba(17,19,24,.88);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:180px}
-.map-hud-title{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:700;margin-bottom:6px}
-.coord{font-family:monospace;font-size:12px;color:var(--accent)}
-.map-ctrls{position:absolute;top:12px;right:12px;z-index:5;display:flex;flex-direction:column;gap:6px}
-.mbtn{width:32px;height:32px;background:rgba(17,19,24,.9);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.mbtn:hover{background:var(--accent);color:#fff}
-.map-filters{position:absolute;bottom:12px;left:12px;z-index:5;display:flex;gap:6px}
-.fchip{background:rgba(17,19,24,.88);border:1px solid var(--border);padding:5px 10px;border-radius:16px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--dim);user-select:none;transition:all .15s}
-.fchip.on{border-color:var(--accent);color:var(--text)}
-.fdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.wp-card{position:absolute;bottom:12px;right:12px;z-index:5;background:rgba(17,19,24,.92);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:none;flex-direction:column;gap:6px;min-width:200px}
-.tp-btn{background:var(--green);color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;transition:all .15s}
-.tp-btn:hover{filter:brightness(1.15)}
-.admin-alert{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:10;background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;display:none;box-shadow:0 0 16px rgba(220,38,38,.5)}
+#map-wrap{position:relative;flex:1;overflow:hidden}
+#gta-map{width:100%;height:100%;background:#0a1020}
+.map-hud{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(10,11,15,.94);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:8px;padding:10px 14px;min-width:180px}
+.map-hud-title{font-size:7px;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim);font-weight:700;margin-bottom:5px}
+.hud-row{display:flex;gap:10px;margin-bottom:3px}
+.hud-item{font-family:Consolas,monospace;font-size:10px}
+.hud-lbl{color:var(--dim);font-size:8px;margin-right:2px}
+.hud-val{color:var(--white)}
+.hud-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:2px;overflow:hidden}
+.hud-bar-fill{height:100%;border-radius:1px;transition:width .3s}
+.hud-bar-hp{background:#22c55e}
+.hud-bar-arm{background:#38bdf8}
+.map-ctrls{position:absolute;top:10px;right:10px;z-index:1000;display:flex;flex-direction:column;gap:3px}
+.mbtn{width:26px;height:26px;background:rgba(10,11,15,.92);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.mbtn:hover{background:var(--white);color:var(--bg);border-color:var(--white)}
+.map-styles{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;background:rgba(10,11,15,.92);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.ms-btn{padding:4px 12px;font-size:9px;font-weight:600;color:var(--dim);cursor:pointer;border:none;background:0 0;transition:all .12s;letter-spacing:.3px}
+.ms-btn:hover{color:var(--text)}
+.ms-btn.active{background:var(--white);color:var(--bg)}
+.map-chips{position:absolute;bottom:10px;left:10px;z-index:1000;display:flex;gap:4px;flex-wrap:wrap}
+.fchip{background:rgba(10,11,15,.9);border:1px solid var(--border);padding:3px 8px;border-radius:12px;font-size:9px;cursor:pointer;display:flex;align-items:center;gap:3px;color:var(--dim);user-select:none;transition:all .12s;font-weight:600}
+.fchip.on{border-color:var(--dim);color:var(--text)}
+.fdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.wp-card{position:absolute;bottom:10px;right:10px;z-index:1000;background:rgba(10,11,15,.95);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:none;flex-direction:column;gap:5px;min-width:200px}
+.wp-title{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:700}
+.wp-coords{font-family:Consolas,monospace;font-size:11px;color:var(--white)}
+.wp-btns{display:flex;gap:4px}
+.wp-tp{background:var(--white);color:var(--bg);border:none;padding:6px;border-radius:5px;font-weight:700;font-size:10px;cursor:pointer;flex:1;letter-spacing:.3px}
+.wp-tp:hover{opacity:.85}
+.wp-clear{background:var(--bg4);color:var(--dim);border:1px solid var(--border);padding:3px 8px;border-radius:4px;font-size:9px;cursor:pointer;font-weight:600}
+.admin-alert{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1001;background:#ef4444;color:#fff;padding:4px 14px;border-radius:12px;font-size:10px;font-weight:700;display:none;letter-spacing:.3px;white-space:nowrap}
+.leaflet-container{background:#0a1020!important;font-family:inherit}
+.leaflet-control-zoom{display:none!important}
+.leaflet-popup-content-wrapper{background:var(--bg3)!important;color:var(--text)!important;border-radius:6px!important;border:1px solid var(--border)!important;box-shadow:0 4px 16px rgba(0,0,0,.6)!important}
+.leaflet-popup-tip{background:var(--bg3)!important;border:1px solid var(--border)!important}
+.leaflet-popup-content{margin:8px 10px!important;font-size:10px!important}
+.leaflet-popup-close-button{color:var(--dim)!important}
+.gta-self{width:14px;height:14px;border-radius:50%;background:#f59e0b;border:2px solid #fff;box-shadow:0 0 8px #f59e0b;animation:pulse 1.5s infinite}
+.gta-admin{width:12px;height:12px;border-radius:50%;background:#ef4444;border:2px solid #fff;box-shadow:0 0 8px rgba(239,68,68,.5);animation:pulse 1.2s infinite}
+.gta-player{width:8px;height:8px;border-radius:50%;background:#38bdf8;border:1.5px solid rgba(255,255,255,.6);box-shadow:0 0 4px rgba(56,189,248,.4)}
+.gta-vehicle{width:7px;height:7px;border-radius:2px;background:#a855f7;border:1px solid rgba(255,255,255,.4);box-shadow:0 0 4px rgba(168,85,247,.4)}
+.gta-poi{width:4px;height:4px;border-radius:50%;background:#f59e0b;opacity:.5}
+.gta-wp{width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 0 8px #22c55e}
+.marker-label{position:absolute;white-space:nowrap;font-size:8px;font-weight:700;left:50%;transform:translateX(-50%);top:-14px;text-shadow:0 1px 2px #000,0 0 6px rgba(0,0,0,.8);pointer-events:none}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.12)}}
+.pop-title{font-weight:700;font-size:11px;margin-bottom:3px}
+.pop-info{color:var(--dim);font-size:9px;line-height:1.4}
+.pop-btn{background:var(--white);color:var(--bg);border:none;padding:3px 8px;border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;margin-top:4px}
+.pop-btn:hover{opacity:.85}
 </style>
 </head>
 <body>
-<div class="app">
-<!-- SIDEBAR -->
 <nav class="sidebar">
 <div class="logo">p4</div>
-<button class="stab active" onclick="switchPage('combat')" title="Combat"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="6" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="1.5"/><line x1="2" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="1.5"/><line x1="18" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.5"/></svg></button>
-<button class="stab" onclick="switchPage('visuals')" title="Visuals"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></button>
-<button class="stab" onclick="switchPage('player')" title="Player"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></button>
-<button class="stab" onclick="switchPage('world')" title="World"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></button>
-<button class="stab" onclick="switchPage('settings')" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></button>
-<button class="stab" onclick="switchPage('radar')" title="Radar Map"><svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg></button>
+<button class="stab active" onclick="switchPage('combat')" title="Combat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></button>
+<button class="stab" onclick="switchPage('visuals')" title="Visuals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+<button class="stab" onclick="switchPage('local')" title="Local"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+<button class="stab" onclick="switchPage('world')" title="World"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></button>
+<button class="stab" onclick="switchPage('settings')" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+<div style="flex:1"></div>
+<button class="stab" onclick="switchPage('radar')" title="Radar" id="radar-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span class="badge" id="admin-badge"></span></button>
 </nav>
-<div class="main-area">
-<!-- TOP BAR -->
-<div class="top-bar">
-<span class="top-label">overlay - in game menu</span>
-<div class="top-right">
-<span class="sub-label">SUB EXPIRES ON: <b>LIFETIME</b></span>
-<span style="font-size:12px"><span class="status-dot"></span>Connected</span>
+<div class="main">
+<div class="topbar">
+<span class="topbar-left" id="page-title">Combat</span>
+<div class="topbar-right">
+<span class="sub-exp">EXPIRES: <b>LIFETIME</b></span>
+<span class="conn"><span class="conn-dot" id="conn-dot"></span><span id="conn-text">Connected</span></span>
 </div>
 </div>
-<!-- CONTENT -->
 <div class="content">
 
-<!-- COMBAT PAGE -->
+<!-- COMBAT -->
 <div class="page active" id="pg-combat">
-<div class="subtabs" id="combat-tabs">
-<button class="subtab active" onclick="subTab('combat',0)">Aimbot</button>
-<button class="subtab" onclick="subTab('combat',1)">Silent</button>
-<button class="subtab" onclick="subTab('combat',2)">TriggerBot</button>
-<button class="subtab" onclick="subTab('combat',3)">Auto Peek</button>
-</div>
-<div class="panels">
-<div class="panel" id="combat-left"></div>
-<div class="panel" id="combat-right"></div>
-</div>
+<div class="subtabs" id="st-combat"><button class="subtab active" onclick="subTab('combat',0)">Aimbot</button><button class="subtab" onclick="subTab('combat',1)">SilentAim</button><button class="subtab" onclick="subTab('combat',2)">TriggerBot</button><button class="subtab" onclick="subTab('combat',3)">Auto Peek</button></div>
+<div class="panels"><div class="panel" id="combat-L"></div><div class="panel" id="combat-R"></div></div>
 </div>
 
-<!-- VISUALS PAGE -->
+<!-- VISUALS -->
 <div class="page" id="pg-visuals">
-<div class="subtabs" id="visuals-tabs">
-<button class="subtab active" onclick="subTab('visuals',0)">Players</button>
-<button class="subtab" onclick="subTab('visuals',1)">Vehicles</button>
-<button class="subtab" onclick="subTab('visuals',2)">Others</button>
-</div>
-<div class="panels">
-<div class="panel" id="visuals-left"></div>
-<div class="panel" id="visuals-right"></div>
-</div>
+<div class="subtabs" id="st-visuals"><button class="subtab active" onclick="subTab('visuals',0)">Players</button><button class="subtab" onclick="subTab('visuals',1)">Vehicles</button><button class="subtab" onclick="subTab('visuals',2)">Others</button></div>
+<div class="panels"><div class="panel" id="visuals-L"></div><div class="panel" id="visuals-R"></div></div>
 </div>
 
-<!-- PLAYER PAGE -->
-<div class="page" id="pg-player">
-<div class="subtabs" id="player-tabs">
-<button class="subtab active" onclick="subTab('player',0)">Main</button>
-<button class="subtab" onclick="subTab('player',1)">Weapons</button>
-<button class="subtab" onclick="subTab('player',2)">Teleports</button>
-</div>
-<div class="panels">
-<div class="panel" id="player-left"></div>
-<div class="panel" id="player-right"></div>
-</div>
+<!-- LOCAL -->
+<div class="page" id="pg-local">
+<div class="subtabs" id="st-local"><button class="subtab active" onclick="subTab('local',0)">Main</button><button class="subtab" onclick="subTab('local',1)">Vehicles</button><button class="subtab" onclick="subTab('local',2)">Teleports</button><button class="subtab" onclick="subTab('local',3)">Weapons</button></div>
+<div class="panels"><div class="panel" id="local-L"></div><div class="panel" id="local-R"></div></div>
 </div>
 
-<!-- WORLD PAGE -->
+<!-- WORLD -->
 <div class="page" id="pg-world">
-<div class="subtabs" id="world-tabs">
-<button class="subtab active" onclick="subTab('world',0)">Players</button>
-<button class="subtab" onclick="subTab('world',1)">Vehicles</button>
-</div>
-<div class="panels"><div class="panel" id="world-content" style="overflow-y:auto"></div></div>
+<div class="subtabs" id="st-world"><button class="subtab active" onclick="subTab('world',0)">Players</button><button class="subtab" onclick="subTab('world',1)">Vehicles</button></div>
+<div class="panels"><div class="panel" id="world-content" style="flex:1"></div></div>
 </div>
 
-<!-- SETTINGS PAGE -->
+<!-- SETTINGS -->
 <div class="page" id="pg-settings">
 <div class="subtabs"><button class="subtab active">Main</button></div>
-<div class="panels">
-<div class="panel" id="settings-left"></div>
-<div class="panel" id="settings-right"></div>
-</div>
+<div class="panels"><div class="panel" id="settings-L"></div><div class="panel" id="settings-R"></div></div>
 </div>
 
-<!-- RADAR MAP PAGE -->
+<!-- RADAR -->
 <div class="page" id="pg-radar">
 <div id="map-wrap">
-<canvas id="map-canvas"></canvas>
-<div class="map-hud">
-<div class="map-hud-title">LOCAL PLAYER</div>
-<div style="display:flex;gap:12px;margin-bottom:4px"><span>X: <span class="coord" id="hx">0</span></span><span>Y: <span class="coord" id="hy">0</span></span><span>Z: <span class="coord" id="hz">0</span></span></div>
-<div style="display:flex;gap:12px;font-size:11px"><span style="color:var(--green)">HP: <b id="hhp">0</b></span><span style="color:var(--accent)">ARM: <b id="harm">0</b></span><span style="color:var(--red)">ADM: <b id="hadm">0</b></span></div>
-</div>
-<div class="map-ctrls">
-<button class="mbtn" onclick="zoomMap(1.25)">+</button>
-<button class="mbtn" onclick="zoomMap(.8)">-</button>
-<button class="mbtn" onclick="recenter()" style="font-size:12px">O</button>
-</div>
 <div class="admin-alert" id="admin-alert"></div>
-<div class="map-filters">
-<div class="fchip on" id="fa" onclick="togFilt('a')"><span class="fdot" style="background:var(--red)"></span>Admins (<b id="ca">0</b>)</div>
-<div class="fchip on" id="fp" onclick="togFilt('p')"><span class="fdot" style="background:var(--accent)"></span>Players (<b id="cp">0</b>)</div>
-<div class="fchip on" id="fv" onclick="togFilt('v')"><span class="fdot" style="background:var(--purple)"></span>Vehicles (<b id="cv">0</b>)</div>
-<div class="fchip on" id="ff" onclick="togFollow()">Follow: <b id="lf">ON</b></div>
+<div class="map-styles"><button class="ms-btn active" onclick="setMapStyle('atlas',this)">Atlas</button><button class="ms-btn" onclick="setMapStyle('satellite',this)">Satellite</button><button class="ms-btn" onclick="setMapStyle('grid',this)">Topo</button></div>
+<div class="map-hud" id="map-hud">
+<div class="map-hud-title">LOCAL PLAYER</div>
+<div class="hud-row"><span class="hud-item"><span class="hud-lbl">X</span><span class="hud-val" id="hud-x">--</span></span><span class="hud-item"><span class="hud-lbl">Y</span><span class="hud-val" id="hud-y">--</span></span><span class="hud-item"><span class="hud-lbl">Z</span><span class="hud-val" id="hud-z">--</span></span></div>
+<div style="margin-top:3px"><span class="hud-item"><span class="hud-lbl">HP</span><span class="hud-val" id="hud-hp">--</span></span><div class="hud-bar"><div class="hud-bar-fill hud-bar-hp" id="bar-hp" style="width:0"></div></div></div>
+<div style="margin-top:2px"><span class="hud-item"><span class="hud-lbl">ARM</span><span class="hud-val" id="hud-arm">--</span></span><div class="hud-bar"><div class="hud-bar-fill hud-bar-arm" id="bar-arm" style="width:0"></div></div></div>
 </div>
-<div class="wp-card" id="wpc">
-<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:700">TARGET WAYPOINT</div>
-<div style="font-size:11px;color:var(--dim)">Coords: <span class="coord" id="wcoord">0, 0</span></div>
-<button class="tp-btn" onclick="tpWaypoint()">TELEPORT HERE</button>
+<div class="map-ctrls"><button class="mbtn" onclick="gtaMap&&gtaMap.zoomIn()">+</button><button class="mbtn" onclick="gtaMap&&gtaMap.zoomOut()">-</button><button class="mbtn" onclick="centerOnSelf()" title="Center" style="font-size:11px">O</button></div>
+<div class="map-chips">
+<div class="fchip on" onclick="toggleFilter(this,'admins')"><span class="fdot" style="background:#ef4444"></span>Admins (<span id="fc-adm">0</span>)</div>
+<div class="fchip on" onclick="toggleFilter(this,'players')"><span class="fdot" style="background:#38bdf8"></span>Players (<span id="fc-ply">0</span>)</div>
+<div class="fchip on" onclick="toggleFilter(this,'vehicles')"><span class="fdot" style="background:#a855f7"></span>Vehicles (<span id="fc-veh">0</span>)</div>
+<div class="fchip" onclick="toggleFollow(this)" id="chip-follow">Follow: OFF</div>
 </div>
+<div class="wp-card" id="wp-card">
+<div class="wp-title">WAYPOINT</div>
+<div class="wp-coords" id="wp-coords">X: 0, Y: 0</div>
+<div class="wp-btns"><button class="wp-tp" onclick="teleportWP()">TELEPORT</button><button class="wp-clear" onclick="clearWP()">Clear</button></div>
+</div>
+<div id="gta-map"></div>
 </div>
 </div>
 
-</div>
-<!-- FOOTER -->
-<footer>
-<div class="user-info"><div class="avatar"></div><span class="uname" id="foot-user">p4m user</span></div>
-<span class="ftime" id="foot-time"></span>
-</footer>
-</div>
-</div>
+</div></div>
+<footer><div class="uinfo"><div class="avatar"></div><span class="uname">p4m</span></div><span class="ftime" id="clock"></span></footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-/* STATE */
-let cfg={},local=null,players=[],vehicles=[],blips=[];
-let curPage='combat',subPages={combat:0,visuals:0,player:0,world:0};
-let filtA=true,filtP=true,filtV=true,follow=true,waypoint=null;
-let mScale=1,panX=0,panY=0,dragging=false,dragSX=0,dragSY=0;
-const GXN=-4000,GXX=4500,GYN=-4000,GYX=8000,GW=GXX-GXN,GH=GYX-GYN;
-const canvas=document.getElementById('map-canvas');
-const ctx=canvas.getContext('2d');
+let cfg={},blipData={},gtaMap=null,tileLayers={},currentStyle='atlas';
+let layerGroups={},selfMarker=null,wpMarker=null,wpData=null;
+let followSelf=false,filters={admins:true,players:true,vehicles:true};
+let curPage='combat',subTabs={combat:0,visuals:0,local:0,world:0};
 
-/* UTILS */
-function tog(k,el){let v=el.checked;fetch('/api/set?'+k+'='+v);cfg[k]=v}
-function sld(k,v,lbl){fetch('/api/set?'+k+'='+v);cfg[k]=parseFloat(v);if(lbl)lbl.textContent=v}
-function mkToggle(id,label,warn){
-  let w=warn?`<span class="ctrl-warn">[AC]</span>`:'';
-  return`<div class="ctrl"><span class="ctrl-label">${label}${w}</span><label class="switch"><input type="checkbox" id="c-${id}" onchange="tog('${id}',this)"><span class="slider"></span></label></div>`;
-}
-function mkSlider(id,label,min,max,unit){
-  return`<div class="range-row"><div class="range-head"><span>${label}</span><b id="v-${id}">${cfg[id]||0}${unit||''}</b></div><input type="range" min="${min}" max="${max}" id="c-${id}" oninput="sld('${id}',this.value,document.getElementById('v-${id}'));document.getElementById('v-${id}').textContent=this.value+'${unit||''}'"></div>`;
-}
+const TITLES={combat:'Combat',visuals:'Visuals',local:'Local',world:'World',settings:'Settings',radar:'Radar Map'};
+const TAB_IDX={combat:0,visuals:1,local:2,world:3,settings:4,radar:5};
 
-/* SYNC CONFIG FROM API */
-function syncUI(){
-  document.querySelectorAll('[id^="c-"]').forEach(el=>{
-    let k=el.id.slice(2);
-    if(k in cfg){
-      if(el.type==='checkbox')el.checked=!!cfg[k];
-      else{el.value=cfg[k];let vl=document.getElementById('v-'+k);if(vl)vl.textContent=cfg[k]+(vl.dataset.u||'')}
-    }
-  });
-}
+const TELEPORTS=[
+{name:'Waypoint',x:156,y:-1043,z:29.3},
+{name:'Square',x:156.2,y:-1043.2,z:29.3},
+{name:'Pier',x:-1847.7,y:-1223.4,z:13.9},
+{name:'Paleto Bay',x:-397.6,y:6047.6,z:32.2},
+{name:'Central Bank',x:221.8,y:217.3,z:106.7},
+{name:'Cassino',x:885.3,y:16.8,z:80.7},
+{name:'Los Santos Airport',x:-975.5,y:-2880.9,z:16.3},
+{name:'Sandy Shores',x:1681.5,y:3251.9,z:40.8},
+];
 
-/* PAGE SWITCHING */
-function switchPage(p){
-  curPage=p;
-  document.querySelectorAll('.stab').forEach((b,i)=>{b.classList.toggle('active',['combat','visuals','player','world','settings','radar'][i]===p)});
-  document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
-  document.getElementById('pg-'+p).classList.add('active');
-  if(p==='radar'){resizeCanvas();drawMap()}
-  if(p==='settings'||p==='combat'||p==='visuals'||p==='player')fetch('/api/config').then(r=>r.json()).then(d=>{cfg=d;syncUI();renderPage()}).catch(()=>{});
+const LOCS=[
+{name:'Legion Square',x:215.4,y:-810.2,z:30.7},{name:'LS Airport',x:-1037,y:-2737,z:20.1},
+{name:'Maze Bank Tower',x:-75,y:-818.9,z:326.2},{name:'Diamond Casino',x:925.3,y:46.2,z:80.9},
+{name:'Vinewood Sign',x:711.4,y:1198.1,z:348.5},{name:'Del Perro Pier',x:-1655.2,y:-1032.1,z:13.1},
+{name:'Grove Street',x:105.9,y:-1940.2,z:20.8},{name:'Fort Zancudo',x:-2047.4,y:3132.1,z:32.8},
+{name:'Sandy Shores',x:1747,y:3273.7,z:41.1},{name:'Humane Labs',x:3619.7,y:3743.6,z:28.6},
+{name:'Mount Chiliad',x:501.8,y:5604.5,z:797.9},{name:'Paleto Bay',x:-446.1,y:6013.8,z:31.7},
+{name:'Observatory',x:-425,y:1123.5,z:325.9},{name:'Port of LS',x:101.3,y:-2970,z:6},
+];
+
+function switchPage(id){
+  curPage=id;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  document.querySelectorAll('.sidebar .stab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sidebar .stab')[TAB_IDX[id]].classList.add('active');
+  document.getElementById('page-title').textContent=TITLES[id]||id;
+  if(id==='radar'&&gtaMap)setTimeout(()=>gtaMap.invalidateSize(),50);
+  if(id!=='radar')renderPage();
+}
+function subTab(page,i){
+  subTabs[page]=i;
+  const tabs=document.getElementById('st-'+page);
+  if(tabs)tabs.querySelectorAll('.subtab').forEach((b,j)=>b.classList.toggle('active',j===i));
   renderPage();
 }
-function subTab(page,idx){
-  subPages[page]=idx;
-  let tabs=document.getElementById(page+'-tabs');
-  if(tabs)tabs.querySelectorAll('.subtab').forEach((b,i)=>b.classList.toggle('active',i===idx));
-  renderPage();
+
+function tog(label,key,ac){
+  const w=ac?'<span class="cwarn">AC</span>':'';
+  return '<div class="ctrl"><span class="clbl">'+label+' '+w+'</span><label class="switch"><input type="checkbox" id="c-'+key+'" onchange="setVal(\''+key+'\',this.checked)"><span class="sw-s"></span></label></div>';
+}
+function sld(label,key,min,max,step,suffix){
+  step=step||1;suffix=suffix||'';
+  return '<div class="rng"><div class="rng-h"><span>'+label+'</span><b id="v-'+key+'">--</b></div><input type="range" min="'+min+'" max="'+max+'" step="'+step+'" id="c-'+key+'" oninput="document.getElementById(\'v-'+key+'\').textContent=this.value+\''+suffix+'\'" onchange="setVal(\''+key+'\',this.value)"></div>';
 }
 
-/* RENDER PAGE CONTENT */
 function renderPage(){
-  switch(curPage){
-    case'combat':renderCombat();break;
-    case'visuals':renderVisuals();break;
-    case'player':renderPlayer();break;
-    case'world':renderWorld();break;
-    case'settings':renderSettings();break;
-  }
-  syncUI();
-}
+  const p=curPage,s=subTabs[p]||0;
+  const L=document.getElementById(p+'-L'),R=document.getElementById(p+'-R');
+  if(!L)return;
 
-function renderCombat(){
-  let L=document.getElementById('combat-left'),R=document.getElementById('combat-right');
-  let s=subPages.combat;
-  if(s===0){
-    L.innerHTML=`<div class="panel-title">AIMBOT</div>${mkToggle('aimbot_enabled','Enable')}${mkToggle('aimbot_visible','Only Visible')}`;
-    R.innerHTML=`<div class="panel-title">SETTINGS</div>${mkSlider('aimbot_fov','Field of View',10,360,'deg')}${mkSlider('aimbot_speed','Smooth Speed',1,50,'')}${mkSlider('aimbot_distance','Max Distance',50,1000,'m')}`;
-  }else if(s===1){
-    L.innerHTML=`<div class="panel-title">SILENT AIM</div>${mkToggle('silentaim_enabled','Enable')}`;
-    R.innerHTML=`<div class="panel-title">SETTINGS</div>${mkSlider('silentaim_fov','Field of View',10,360,'deg')}${mkSlider('silentaim_distance','Max Distance',50,1000,'m')}`;
-  }else if(s===2){
-    L.innerHTML=`<div class="panel-title">TRIGGERBOT</div>${mkToggle('triggerbot_enabled','Enable')}`;
-    R.innerHTML=`<div class="panel-title">INFO</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Triggerbot automatically fires when crosshair is over a target. Configure keybind and FOV in the overlay menu.</p>`;
-  }else{
-    L.innerHTML=`<div class="panel-title">AUTO PEEK</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Auto Peek saves your position, lets you peek around corners, then teleports you back. Configure keybind in the overlay menu.</p>`;
-    R.innerHTML=`<div class="panel-title">HOW TO USE</div><p style="color:var(--dim);font-size:12px;line-height:1.6">1. Press the peek key to save position.<br>2. Move and peek around corners.<br>3. Press again to teleport back.</p>`;
+  if(p==='combat'){
+    if(s===0){
+      L.innerHTML='<div class="ptitle">AIMBOT</div>'+tog('Enable','aimbot_enabled')+tog('Only Visible','aimbot_visible')+tog('Ignore NPCs','aimbot_ignore_npcs')+tog('Show Fov','aimbot_showfov');
+      R.innerHTML='<div class="ptitle">SETTINGS</div>'+sld('Field of View','aimbot_fov',0,400)+sld('Smooth','aimbot_speed',0,100)+sld('Max Distance','aimbot_distance',0,1000,1,'m');
+    }else if(s===1){
+      L.innerHTML='<div class="ptitle">SILENT AIM</div>'+tog('Enable','silentaim_enabled')+tog('Magic Bullets','silentaim_magic')+tog('Only Visible','silentaim_visible')+tog('Ignore NPCs','silentaim_ignore_npcs')+tog('Show Fov','silentaim_showfov');
+      R.innerHTML='<div class="ptitle">SETTINGS</div>'+sld('Field of View','silentaim_fov',0,400)+sld('Miss Chance','silentaim_miss',0,100)+sld('Max Distance','silentaim_distance',0,1000,1,'m');
+    }else if(s===2){
+      L.innerHTML='<div class="ptitle">TRIGGERBOT</div>'+tog('Enable','triggerbot_enabled')+tog('Smart Triggerbot','triggerbot_smart')+tog('Only Visible','triggerbot_visible')+tog('Ignore NPCs','triggerbot_ignore_npcs')+tog('Show Fov','triggerbot_showfov');
+      R.innerHTML='<div class="ptitle">SETTINGS</div>'+sld('Field of View','triggerbot_fov',0,400)+sld('Max Distance','triggerbot_distance',0,1000,1,'m')+sld('Delay','triggerbot_delay',0,10);
+    }else{
+      L.innerHTML='<div class="ptitle">AUTO PEEK</div>'+tog('Enable','autopeek');
+      R.innerHTML='<div class="ptitle">INFO</div><p class="info-text">Press the peek key once to save your position. Peek around corners, then press again to teleport back.</p><p class="info-text">Configure the peek keybind in the overlay menu.</p>';
+    }
+  }else if(p==='visuals'){
+    if(s===0){
+      L.innerHTML='<div class="ptitle">PLAYER ESP</div>'+tog('Enable','esp_enabled')+tog('Admin ESP','esp_admin')+tog('Admin Multi-Color','esp_admin_rainbow')+tog('Box','esp_box')+tog('Skeleton','esp_skeleton')+tog('SnapLines','esp_snaplines')+tog('Head Circle','esp_headcircle')+tog('Weapon Names','esp_weapon')+tog('Player Names','esp_names')+tog('Distance','esp_distance')+tog('Health Bar','esp_health')+tog('Armor Bar','esp_armor');
+      R.innerHTML='<div class="ptitle">PREVIEW</div><p class="info-text">ESP preview is available in the overlay menu. Toggle options here and they sync to the game in real-time.</p>';
+    }else if(s===1){
+      L.innerHTML='<div class="ptitle">VEHICLE ESP</div>'+tog('Toggle','vehesp_enabled')+tog('Vehicle Names','vehesp_names')+tog('Locked/Unlocked','vehesp_lockunlock')+tog('SnapLines','vehesp_snaplines')+tog('Distance','vehesp_distance');
+      R.innerHTML='<div class="ptitle">SETTINGS</div>'+sld('Max Distance','vehesp_max_distance',0,1000,1,'m');
+    }else{
+      L.innerHTML='<div class="ptitle">VISUAL SETTINGS</div>'+tog('Show LocalPlayer','esp_showlocal')+tog('Ignore Dead','esp_ignore_dead')+tog('Ignore NPCs','esp_ignore_npcs')+tog('Friend Marker','esp_friends')+sld('Max Distance','esp_max_distance',0,1000,1,'m')+tog('Web Map Radar','web_enabled');
+      R.innerHTML='<div class="ptitle">COLORS</div><p class="info-text">Color customization is available in the overlay menu. Changes to ESP colors apply in real-time through the in-game interface.</p>';
+    }
+  }else if(p==='local'){
+    if(s===0){
+      L.innerHTML='<div class="ptitle">PLAYER</div>'+tog('GodMode','godmode',1)+tog('NoClip','noclip',1)+tog('Fast Run','fastrun',1)+tog('Anti Headshot','antihs',1)+tog('Shrink','shrink',1)+tog('No RagDoll','noragdoll')+tog('Steal Car','stealcar')+tog('Infinite CombatRoll','combatroll')+tog('Force Weapon Wheel','weaponwheel');
+      R.innerHTML='<div class="ptitle">SPEED</div>'+sld('NoClip Speed','noclip_speed',0.1,20,0.1,'m/s')+sld('Run Speed','fastrun_speed',0.1,10,0.1,'m/s');
+    }else if(s===1){
+      L.innerHTML='<div class="ptitle">VEHICLE</div>'+tog('GodMode','veh_godmode')+tog('SeatBelt','seatbelt');
+      R.innerHTML='<div class="ptitle">ACTIONS</div><p class="info-text">Doors Lock/Unlock, Repair Vehicle, and Handling Editor are available in the overlay menu while in a vehicle.</p>';
+    }else if(s===2){
+      const tpH=TELEPORTS.map(t=>'<div class="tp-row"><div><div class="tp-name">'+esc(t.name)+'</div><div class="tp-coords">'+t.x+', '+t.y+', '+t.z+'</div></div><button class="tp-go" onclick="doTP('+t.x+','+t.y+','+t.z+')">GO</button></div>').join('');
+      L.innerHTML='<div class="ptitle">LOCATIONS</div><div class="tp-list">'+tpH+'</div>';
+      R.innerHTML='<div class="ptitle">TELEPORT</div><p class="info-text">Click GO to teleport instantly. Use the Radar Map tab to click anywhere on the GTA V map to set a waypoint and teleport.</p>';
+    }else{
+      L.innerHTML='<div class="ptitle">WEAPONS</div>'+tog('Recoil Control','norecoil')+tog('Spread Control','nospread')+tog('No Reload','noreload')+tog('Infinite Ammo','ammo');
+      R.innerHTML='<div class="ptitle">INFO</div><p class="info-text">Recoil/Spread value sliders and Ammo management are available in the overlay menu. Weapon spawn requires the in-game overlay.</p>';
+    }
+  }else if(p==='settings'){
+    const sL=document.getElementById('settings-L'),sR=document.getElementById('settings-R');
+    sL.innerHTML='<div class="ptitle">GENERAL</div>'+tog('WaterMark','watermark')+tog('Stream Proof','streamproof');
+    sR.innerHTML='<div class="ptitle">WEB / CONFIG</div>'+tog('Web Map Radar Server','web_enabled')+tog('Render Cloud Sync','web_cloudsync')+'<p class="info-text" style="margin-top:8px">Menu Key, Panic Key, Menu Color, Export/Import Config are available in the overlay menu.</p>';
   }
-  syncUI();
-}
-
-function renderVisuals(){
-  let L=document.getElementById('visuals-left'),R=document.getElementById('visuals-right');
-  let s=subPages.visuals;
-  if(s===0){
-    L.innerHTML=`<div class="panel-title">PLAYER ESP</div>${mkToggle('esp_enabled','Enable')}${mkToggle('esp_admin','Admin ESP')}${mkToggle('esp_admin_rainbow','Admin Rainbow')}${mkToggle('esp_box','Box')}${mkToggle('esp_skeleton','Skeleton')}${mkToggle('esp_snaplines','SnapLines')}${mkToggle('esp_headcircle','Head Circle')}${mkToggle('esp_names','Player Names')}${mkToggle('esp_weapon','Weapon Names')}${mkToggle('esp_distance','Distance')}${mkToggle('esp_health','Health Bar')}${mkToggle('esp_armor','Armor Bar')}`;
-    R.innerHTML=`<div class="panel-title">FILTERS</div>${mkToggle('esp_ignore_npcs','Ignore NPCs')}${mkToggle('esp_ignore_dead','Ignore Dead')}${mkSlider('esp_max_distance','Max Distance',50,1000,'m')}`;
-  }else if(s===1){
-    L.innerHTML=`<div class="panel-title">VEHICLE ESP</div>${mkToggle('vehesp_enabled','Enable')}${mkToggle('vehesp_names','Vehicle Names')}${mkToggle('vehesp_snaplines','SnapLines')}${mkToggle('vehesp_distance','Distance')}`;
-    R.innerHTML=`<div class="panel-title">INFO</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Vehicle ESP shows nearby vehicles with names, distance, and lock status. Configure max distance in the overlay.</p>`;
-  }else{
-    L.innerHTML=`<div class="panel-title">OTHER SETTINGS</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Additional visual settings like Friend Markers and color customization are available in the overlay menu.</p>`;
-    R.innerHTML=`<div class="panel-title">WEB RADAR</div><p style="color:var(--dim);font-size:12px;line-height:1.6">The Radar Map tab shows all players, vehicles, and blips on a live interactive GTA V map.</p>`;
-  }
-  syncUI();
-}
-
-function renderPlayer(){
-  let L=document.getElementById('player-left'),R=document.getElementById('player-right');
-  let s=subPages.player;
-  if(s===0){
-    L.innerHTML=`<div class="panel-title">PLAYER EXPLOITS</div>${mkToggle('godmode','GodMode',true)}${mkToggle('noclip','NoClip',true)}${mkToggle('fastrun','Fast Run',true)}${mkToggle('stamina','Infinite Stamina')}`;
-    R.innerHTML=`<div class="panel-title">WEAPON MODS</div>${mkToggle('norecoil','No Recoil')}${mkToggle('nospread','No Spread')}${mkToggle('ammo','Infinite Ammo')}${mkSlider('noclip_speed','NoClip Speed',1,20,'')}`;
-  }else if(s===1){
-    L.innerHTML=`<div class="panel-title">WEAPONS</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Weapon spawn is only available from the in-game overlay menu.</p>`;
-    R.innerHTML=`<div class="panel-title">AMMO</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Use Add Ammo from the overlay to set ammo values for your current weapon.</p>`;
-  }else{
-    let locs=[['Waypoint','0','0'],['Plaza','156','-1043'],['Pier','-1848','-1223'],['Paleto Bay','-398','6048'],['Central Bank','222','217'],['Casino','885','17'],['LS Airport','-976','-2881'],['Sandy Shores','1681','3252']];
-    L.innerHTML=`<div class="panel-title">TELEPORT LOCATIONS</div>`+locs.map(l=>`<div class="ctrl"><span class="ctrl-label">${l[0]}</span><button class="tbtn" onclick="fetch('/api/teleport?x=${l[1]}&y=${l[2]}').then(()=>alert('Teleported to ${l[0]}'))">GO</button></div>`).join('');
-    R.innerHTML=`<div class="panel-title">INFO</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Click GO to teleport to a preset location. Use the Radar Map to teleport to any point on the map by clicking.</p>`;
-  }
-  syncUI();
+  syncCfgUI();
+  if(p==='world')renderWorld();
 }
 
 function renderWorld(){
-  let C=document.getElementById('world-content');
-  let s=subPages.world;
+  const wc=document.getElementById('world-content');
+  const s=subTabs.world||0;
   if(s===0){
-    if(!players.length){C.innerHTML='<div class="panel-title">PLAYERS</div><p style="color:var(--dim);text-align:center;padding:20px">No players in range</p>';return}
-    C.innerHTML=`<div class="panel-title">PLAYERS (${players.length})</div><table class="dtable"><thead><tr><th>Type</th><th>Name</th><th>Dist</th><th>HP</th><th>Weapon</th><th>Actions</th></tr></thead><tbody>${players.map(p=>`<tr><td>${p.is_admin?'<span class="badge-admin">ADMIN</span>':'<span class="badge-player">Player</span>'}</td><td style="font-weight:600">${p.name}</td><td>${Math.round(p.dist)}m</td><td>${Math.round(p.health)}</td><td style="color:var(--dim)">${p.weapon||'Unarmed'}</td><td><button class="tbtn" onclick="fetch('/api/teleport?x=${p.x}&y=${p.y}&z=${p.z}')">TP</button></td></tr>`).join('')}</tbody></table>`;
+    const pls=blipData.players||[];
+    let rows=pls.map(p=>{
+      const badge=p.is_admin?'<span class="badge-admin">[Admin]</span>':'<span class="badge-player">Player</span>';
+      return '<tr><td>'+badge+'</td><td style="font-weight:600">'+esc(p.name)+'</td><td>'+Math.round(p.dist||0)+'m</td><td>'+Math.round(p.health||0)+'</td><td>'+Math.round(p.armor||0)+'</td><td style="font-size:9px;color:var(--dim)">'+esc(p.weapon||'Unarmed')+'</td><td><button class="tbtn" onclick="doTP('+p.x+','+p.y+','+p.z+')">TP</button></td></tr>';
+    }).join('');
+    if(!rows)rows='<tr><td colspan="7" style="color:var(--dim);text-align:center;padding:16px">No players detected</td></tr>';
+    wc.innerHTML='<div class="ptitle">PLAYERS ('+pls.length+')</div><table class="dtable"><thead><tr><th>Type</th><th>Name</th><th>Dist</th><th>HP</th><th>Armor</th><th>Weapon</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
   }else{
-    if(!vehicles.length){C.innerHTML='<div class="panel-title">VEHICLES</div><p style="color:var(--dim);text-align:center;padding:20px">No vehicles in range</p>';return}
-    C.innerHTML=`<div class="panel-title">VEHICLES (${vehicles.length})</div><table class="dtable"><thead><tr><th>Name</th><th>Dist</th><th>Driver</th><th>Actions</th></tr></thead><tbody>${vehicles.map(v=>`<tr><td style="font-weight:600">${v.name}</td><td>${Math.round(v.dist)}m</td><td style="color:var(--dim)">${v.has_driver?'Yes':'No'}</td><td><button class="tbtn" onclick="fetch('/api/teleport?x=${v.x}&y=${v.y}&z=${v.z}')">TP</button></td></tr>`).join('')}</tbody></table>`;
+    const vhs=blipData.vehicles||[];
+    let rows=vhs.map(v=>'<tr><td style="font-weight:600">'+esc(v.name)+'</td><td>'+Math.round(v.dist||0)+'m</td><td>'+(v.has_driver?'Yes':'No')+'</td><td><button class="tbtn" onclick="doTP('+v.x+','+v.y+','+(v.z||30)+')">TP</button></td></tr>').join('');
+    if(!rows)rows='<tr><td colspan="4" style="color:var(--dim);text-align:center;padding:16px">No vehicles detected</td></tr>';
+    wc.innerHTML='<div class="ptitle">VEHICLES ('+vhs.length+')</div><table class="dtable"><thead><tr><th>Name</th><th>Dist</th><th>Driver</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
   }
 }
 
-function renderSettings(){
-  let L=document.getElementById('settings-left'),R=document.getElementById('settings-right');
-  L.innerHTML=`<div class="panel-title">GENERAL</div><p style="color:var(--dim);font-size:12px;line-height:1.6;margin-bottom:8px">Keybinds, Menu Color, Stream Proof, Watermark and Panic Key are configured from the overlay menu.</p><div class="ctrl"><span class="ctrl-label">Web Radar</span><span style="color:var(--green);font-size:12px;font-weight:600">Active</span></div>`;
-  R.innerHTML=`<div class="panel-title">CONFIG</div><p style="color:var(--dim);font-size:12px;line-height:1.6">Export / Import configs from the overlay Settings page. Cloud sync URL can be set there as well.</p>`;
+function setVal(k,v){fetch('/api/set?'+k+'='+v).catch(()=>{});}
+function doTP(x,y,z){fetch('/api/teleport?x='+x+'&y='+y+'&z='+(z||30)).catch(()=>{});}
+
+function syncCfgUI(){
+  for(const[k,v]of Object.entries(cfg)){
+    const el=document.getElementById('c-'+k);
+    if(!el)continue;
+    if(el.type==='checkbox')el.checked=!!v;
+    else{el.value=v;const vEl=document.getElementById('v-'+k);if(vEl)vEl.textContent=v;}
+  }
 }
 
-/* MAP */
-function resizeCanvas(){canvas.width=canvas.parentElement.clientWidth;canvas.height=canvas.parentElement.clientHeight}
-window.addEventListener('resize',()=>{if(curPage==='radar'){resizeCanvas();drawMap()}});
-
-function w2c(wx,wy){
-  let nx=(wx-GXN)/GW,ny=1-(wy-GYN)/GH;
-  return{x:nx*2400*mScale+panX+canvas.width/2,y:ny*3200*mScale+panY+canvas.height/2};
-}
-function c2w(cx,cy){
-  let nx=(cx-panX-canvas.width/2)/(2400*mScale),ny=(cy-panY-canvas.height/2)/(3200*mScale);
-  return{x:GXN+nx*GW,y:GYN+(1-ny)*GH};
+function fetchConfig(){
+  fetch('/api/config').then(r=>r.json()).then(d=>{cfg=d;syncCfgUI();}).catch(()=>{});
 }
 
-function drawMap(){
-  if(!ctx)return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#060810';ctx.fillRect(0,0,canvas.width,canvas.height);
-  // Grid
-  ctx.strokeStyle='#111825';ctx.lineWidth=1;
-  for(let x=GXN;x<=GXX;x+=500){let a=w2c(x,GYN),b=w2c(x,GYX);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
-  for(let y=GYN;y<=GYX;y+=500){let a=w2c(GXN,y),b=w2c(GXX,y);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
-  // Island
-  ctx.fillStyle='#0e1420';ctx.strokeStyle='#1a2640';ctx.lineWidth=2*mScale;
-  let pts=[[-3000,-2500],[-3500,-1000],[-3200,1500],[-2500,3500],[-1800,5000],[-800,6500],[400,7500],[1800,7000],[3200,5000],[3600,2500],[3200,500],[2500,-1500],[2000,-3200],[500,-3800],[-1200,-3600],[-2200,-3000]];
-  ctx.beginPath();pts.forEach((p,i)=>{let c=w2c(p[0],p[1]);i===0?ctx.moveTo(c.x,c.y):ctx.lineTo(c.x,c.y)});ctx.closePath();ctx.fill();ctx.stroke();
-  // Lake
-  ctx.fillStyle='#060810';ctx.beginPath();
-  [[500,3500],[1800,3800],[2200,4200],[1500,4500],[600,4300],[200,3800]].forEach((p,i)=>{let c=w2c(p[0],p[1]);i===0?ctx.moveTo(c.x,c.y):ctx.lineTo(c.x,c.y)});ctx.closePath();ctx.fill();
-  // Roads
-  ctx.strokeStyle='#1a2844';ctx.lineWidth=2*mScale;ctx.beginPath();
-  let r=w2c(-2800,-2000);ctx.moveTo(r.x,r.y);r=w2c(-3000,1000);ctx.lineTo(r.x,r.y);r=w2c(-2000,4000);ctx.lineTo(r.x,r.y);r=w2c(0,6800);ctx.lineTo(r.x,r.y);
-  r=w2c(1500,-3000);ctx.moveTo(r.x,r.y);r=w2c(2500,1000);ctx.lineTo(r.x,r.y);r=w2c(2800,4500);ctx.lineTo(r.x,r.y);r=w2c(500,7200);ctx.lineTo(r.x,r.y);ctx.stroke();
-  // LS glow
-  ctx.fillStyle='rgba(30,45,75,.35)';let ls=w2c(0,-1500);ctx.beginPath();ctx.arc(ls.x,ls.y,200*mScale,0,Math.PI*2);ctx.fill();
-  // Labels
-  ctx.fillStyle='#3a4560';ctx.font=`${Math.max(9,12*mScale)}px sans-serif`;ctx.textAlign='center';
-  [['LOS SANTOS',0,-1400],['LSIA',-1100,-3000],['SANDY SHORES',1600,3600],['MT CHILIAD',400,5600],['PALETO BAY',-200,6400],['FT ZANCUDO',-2200,3100]].forEach(l=>{let c=w2c(l[1],l[2]);ctx.fillText(l[0],c.x,c.y)});
-  // Blips
-  if(blips)blips.forEach(b=>{let p=w2c(b.x,b.y);let isWP=b.sprite===8;ctx.fillStyle=isWP?'#c084fc':'#475569';ctx.beginPath();ctx.arc(p.x,p.y,isWP?5:2.5,0,Math.PI*2);ctx.fill()});
-  // Vehicles
-  let vc=0;
-  if(filtV&&vehicles){vc=vehicles.length;vehicles.forEach(v=>{let p=w2c(v.x,v.y);ctx.fillStyle='#a855f7';ctx.beginPath();ctx.arc(p.x,p.y,3.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#c084fc';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(v.name,p.x,p.y-6)})}
-  // Players
-  let ac=0,pc=0;
-  if(players)players.forEach(p=>{
-    if(p.is_admin)ac++;
-    if(p.is_admin&&!filtA)return;if(!p.is_admin&&!filtP)return;pc++;
-    let pos=w2c(p.x,p.y);
-    if(p.is_admin){
-      let t=Date.now()/300,pr=7+Math.sin(t)*3;
-      ctx.strokeStyle='rgba(239,68,68,.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(pos.x,pos.y,pr+5,0,Math.PI*2);ctx.stroke();
-      ctx.fillStyle='#ef4444';ctx.beginPath();ctx.arc(pos.x,pos.y,6,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#fca5a5';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('[ADMIN] '+p.name,pos.x,pos.y-10);
-    }else{
-      ctx.fillStyle='#38bdf8';ctx.beginPath();ctx.arc(pos.x,pos.y,4,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#cbd5e1';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText(p.name,pos.x,pos.y-7);
-    }
-  });
-  // Waypoint
-  if(waypoint){let wp=w2c(waypoint.x,waypoint.y);ctx.strokeStyle='var(--green,#22c55e)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(wp.x,wp.y,9,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#22c55e';ctx.beginPath();ctx.arc(wp.x,wp.y,3,0,Math.PI*2);ctx.fill()}
-  // Local
-  if(local){let m=w2c(local.x,local.y);let t=(Date.now()%2000)/2000;ctx.strokeStyle=`rgba(245,158,11,${1-t})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(m.x,m.y,6+t*20,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(m.x,m.y,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(m.x,m.y,2.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fbbf24';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('YOU',m.x,m.y-11)}
-  // Counters
-  document.getElementById('ca').textContent=ac;
-  document.getElementById('cp').textContent=players?players.length:0;
-  document.getElementById('cv').textContent=vehicles?vehicles.length:0;
-  let al=document.getElementById('admin-alert');
-  if(ac>0){al.style.display='block';al.textContent=ac+' ADMIN(S) DETECTED IN SESSION'}else al.style.display='none';
-}
-
-// Map interaction
-canvas.addEventListener('mousedown',e=>{dragging=true;dragSX=e.clientX-panX;dragSY=e.clientY-panY});
-window.addEventListener('mousemove',e=>{if(!dragging)return;panX=e.clientX-dragSX;panY=e.clientY-dragSY;follow=false;document.getElementById('lf').textContent='OFF';document.getElementById('ff').classList.remove('on');drawMap()});
-window.addEventListener('mouseup',()=>dragging=false);
-canvas.addEventListener('wheel',e=>{e.preventDefault();zoomMap(e.deltaY<0?1.15:.87)},{passive:false});
-canvas.addEventListener('click',e=>{if(dragging)return;let r=canvas.getBoundingClientRect();waypoint=c2w(e.clientX-r.left,e.clientY-r.top);document.getElementById('wpc').style.display='flex';document.getElementById('wcoord').textContent=waypoint.x.toFixed(1)+', '+waypoint.y.toFixed(1);drawMap()});
-
-function zoomMap(f){mScale=Math.max(.15,Math.min(10,mScale*f));drawMap()}
-function recenter(){if(local){let nx=(local.x-GXN)/GW,ny=1-(local.y-GYN)/GH;panX=-(nx*2400*mScale);panY=-(ny*3200*mScale)}else{panX=0;panY=0}drawMap()}
-function togFollow(){follow=!follow;document.getElementById('lf').textContent=follow?'ON':'OFF';document.getElementById('ff').classList.toggle('on',follow);if(follow)recenter()}
-function togFilt(t){if(t==='a'){filtA=!filtA;document.getElementById('fa').classList.toggle('on',filtA)}if(t==='p'){filtP=!filtP;document.getElementById('fp').classList.toggle('on',filtP)}if(t==='v'){filtV=!filtV;document.getElementById('fv').classList.toggle('on',filtV)}drawMap()}
-function tpWaypoint(){if(!waypoint)return;fetch('/api/teleport?x='+waypoint.x.toFixed(1)+'&y='+waypoint.y.toFixed(1))}
-
-/* POLLING */
-function poll(){
+function pollBlips(){
   fetch('/api/blips').then(r=>r.json()).then(d=>{
-    local=d.local;players=d.players||[];vehicles=d.vehicles||[];blips=d.map_blips||[];
-    if(local){
-      document.getElementById('hx').textContent=local.x.toFixed(1);
-      document.getElementById('hy').textContent=local.y.toFixed(1);
-      document.getElementById('hz').textContent=local.z.toFixed(1);
-      document.getElementById('hhp').textContent=Math.round(local.health);
-      document.getElementById('harm').textContent=Math.round(local.armor);
-      document.getElementById('hadm').textContent=players.filter(p=>p.is_admin).length;
-      if(follow&&curPage==='radar')recenter();
-    }
-    if(curPage==='radar')drawMap();
+    blipData=d;
+    updateMap();
     if(curPage==='world')renderWorld();
   }).catch(()=>{});
 }
 
-/* FOOTER CLOCK */
-function clock(){let d=new Date();document.getElementById('foot-time').textContent=d.toLocaleDateString('en',{weekday:'short'})+' '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'})}
+function createCRS(){
+  return Object.assign({},L.CRS.Simple,{
+    projection:L.Projection.LonLat,
+    scale(z){return Math.pow(2,z)},
+    zoom(s){return Math.log(s)/Math.LN2},
+    distance(a,b){return Math.hypot(b.lng-a.lng,b.lat-a.lat)},
+    transformation:new L.Transformation(0.02072,117.3,-0.0205,172.8),
+    infinite:true
+  });
+}
 
-/* INIT */
-fetch('/api/config').then(r=>r.json()).then(d=>{cfg=d;renderPage()}).catch(()=>renderPage());
-setInterval(poll,200);
-setInterval(clock,1000);
-clock();
-resizeCanvas();
+function initMap(){
+  if(gtaMap)return;
+  const crs=createCRS();
+  tileLayers={
+    atlas:L.tileLayer('/mapStyles/styleAtlas/{z}/{x}/{y}.jpg',{minZoom:0,maxZoom:5,noWrap:true,errorTileUrl:'/mapStyles/styleAtlas/empty.jpg'}),
+    satellite:L.tileLayer('/mapStyles/styleSatelite/{z}/{x}/{y}.jpg',{minZoom:0,maxZoom:5,noWrap:true,errorTileUrl:'/mapStyles/styleAtlas/empty.jpg'}),
+    grid:L.tileLayer('/mapStyles/styleGrid/{z}/{x}/{y}.png',{minZoom:0,maxZoom:5,noWrap:true,errorTileUrl:'/mapStyles/styleAtlas/empty.jpg'})
+  };
+  gtaMap=L.map('gta-map',{
+    crs,minZoom:1,maxZoom:5,zoom:3,center:[200,0],
+    layers:[tileLayers.atlas],zoomControl:false,preferCanvas:true,
+    maxBounds:L.latLngBounds(L.latLng(-4600,-6000),L.latLng(8600,6800)),
+    maxBoundsViscosity:0.9
+  });
+  layerGroups={admins:L.layerGroup().addTo(gtaMap),players:L.layerGroup().addTo(gtaMap),vehicles:L.layerGroup().addTo(gtaMap),pois:L.layerGroup().addTo(gtaMap)};
+
+  LOCS.forEach(loc=>{
+    const ic=L.divIcon({className:'',html:'<div class="gta-poi"></div>',iconSize:[4,4],iconAnchor:[2,2]});
+    const m=L.marker([loc.y,loc.x],{icon:ic}).addTo(layerGroups.pois);
+    m.bindPopup('<div class="pop-title">'+esc(loc.name)+'</div><div class="pop-info">X: '+loc.x.toFixed(1)+', Y: '+loc.y.toFixed(1)+'</div><button class="pop-btn" onclick="doTP('+loc.x+','+loc.y+','+loc.z+')">Teleport</button>');
+  });
+
+  gtaMap.on('click',e=>{
+    wpData={x:e.latlng.lng,y:e.latlng.lat,z:30};
+    const ic=L.divIcon({className:'',html:'<div class="gta-wp"></div>',iconSize:[12,12],iconAnchor:[6,6]});
+    if(wpMarker)wpMarker.setLatLng(e.latlng);
+    else wpMarker=L.marker(e.latlng,{icon:ic}).addTo(gtaMap);
+    document.getElementById('wp-card').style.display='flex';
+    document.getElementById('wp-coords').textContent='X: '+wpData.x.toFixed(1)+' Y: '+wpData.y.toFixed(1);
+  });
+  gtaMap.on('dragstart',()=>{followSelf=false;updateFollowUI();});
+}
+
+function setMapStyle(style,btn){
+  if(!gtaMap||!tileLayers[style])return;
+  gtaMap.removeLayer(tileLayers[currentStyle]);
+  tileLayers[style].addTo(gtaMap);
+  currentStyle=style;
+  document.querySelectorAll('.ms-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+function updateMap(){
+  if(!gtaMap)return;
+  const loc=blipData.local;
+  const pls=blipData.players||[];
+  const vhs=blipData.vehicles||[];
+  const admins=pls.filter(p=>p.is_admin);
+
+  if(loc){
+    document.getElementById('hud-x').textContent=loc.x.toFixed(1);
+    document.getElementById('hud-y').textContent=loc.y.toFixed(1);
+    document.getElementById('hud-z').textContent=(loc.z||0).toFixed(1);
+    document.getElementById('hud-hp').textContent=Math.round(loc.health||0);
+    document.getElementById('hud-arm').textContent=Math.round(loc.armor||0);
+    document.getElementById('bar-hp').style.width=Math.min(100,(loc.health||0)/2)+'%';
+    document.getElementById('bar-arm').style.width=Math.min(100,loc.armor||0)+'%';
+  }
+
+  document.getElementById('fc-adm').textContent=admins.length;
+  document.getElementById('fc-ply').textContent=pls.length;
+  document.getElementById('fc-veh').textContent=vhs.length;
+
+  const aa=document.getElementById('admin-alert'),ab=document.getElementById('admin-badge');
+  if(admins.length>0){
+    aa.style.display='block';
+    aa.textContent=admins.length+' ADMIN(S) -- '+admins.map(a=>a.name).join(', ');
+    ab.style.display='block';
+  }else{aa.style.display='none';ab.style.display='none';}
+
+  if(loc){
+    const ic=L.divIcon({className:'',html:'<div class="gta-self"></div><div class="marker-label" style="color:#f59e0b">YOU</div>',iconSize:[14,14],iconAnchor:[7,7]});
+    if(selfMarker)selfMarker.setLatLng([loc.y,loc.x]);
+    else selfMarker=L.marker([loc.y,loc.x],{icon:ic,zIndexOffset:1000}).addTo(gtaMap);
+    if(followSelf)gtaMap.panTo([loc.y,loc.x],{animate:true});
+  }
+
+  layerGroups.admins.clearLayers();
+  layerGroups.players.clearLayers();
+  if(filters.admins||filters.players){
+    pls.forEach(p=>{
+      if(p.is_admin&&!filters.admins)return;
+      if(!p.is_admin&&!filters.players)return;
+      const isA=p.is_admin;
+      const cls=isA?'gta-admin':'gta-player';
+      const lbl=isA?'[ADMIN] '+p.name:p.name;
+      const col=isA?'#ef4444':'#38bdf8';
+      const sz=isA?12:8;
+      const ic=L.divIcon({className:'',html:'<div class="'+cls+'"></div><div class="marker-label" style="color:'+col+'">'+esc(lbl)+'</div>',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+      const m=L.marker([p.y,p.x],{icon:ic,zIndexOffset:isA?900:500});
+      m.bindPopup('<div class="pop-title">'+(isA?'[ADMIN] ':'')+esc(p.name)+'</div><div class="pop-info">ID #'+p.id+' | '+Math.round(p.dist||0)+'m<br>HP: '+Math.round(p.health||0)+' | ARM: '+Math.round(p.armor||0)+'<br>'+esc(p.weapon||'Unarmed')+'</div><button class="pop-btn" onclick="doTP('+p.x+','+p.y+','+p.z+')">Teleport</button>');
+      m.addTo(isA?layerGroups.admins:layerGroups.players);
+    });
+  }
+
+  layerGroups.vehicles.clearLayers();
+  if(filters.vehicles){
+    vhs.forEach(v=>{
+      const ic=L.divIcon({className:'',html:'<div class="gta-vehicle"></div><div class="marker-label" style="color:#a855f7">'+esc(v.name)+'</div>',iconSize:[7,7],iconAnchor:[3,3]});
+      const m=L.marker([v.y,v.x],{icon:ic});
+      m.bindPopup('<div class="pop-title">'+esc(v.name)+'</div><div class="pop-info">'+Math.round(v.dist||0)+'m | Driver: '+(v.has_driver?'Yes':'No')+'</div><button class="pop-btn" onclick="doTP('+v.x+','+v.y+','+(v.z||30)+')">Teleport</button>');
+      m.addTo(layerGroups.vehicles);
+    });
+  }
+}
+
+function centerOnSelf(){
+  if(!gtaMap||!blipData.local)return;
+  gtaMap.flyTo([blipData.local.y,blipData.local.x],4,{duration:.3});
+}
+function toggleFilter(el,name){filters[name]=!filters[name];el.classList.toggle('on',filters[name]);updateMap();}
+function toggleFollow(el){followSelf=!followSelf;updateFollowUI();if(followSelf)centerOnSelf();}
+function updateFollowUI(){const el=document.getElementById('chip-follow');el.textContent='Follow: '+(followSelf?'ON':'OFF');el.classList.toggle('on',followSelf);}
+function teleportWP(){if(wpData)doTP(wpData.x,wpData.y,wpData.z);}
+function clearWP(){wpData=null;if(wpMarker&&gtaMap){gtaMap.removeLayer(wpMarker);wpMarker=null;}document.getElementById('wp-card').style.display='none';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function updateClock(){
+  const d=new Date();
+  document.getElementById('clock').textContent=d.toLocaleDateString('en-US',{weekday:'short'})+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  renderPage();
+  fetchConfig();
+  pollBlips();
+  updateClock();
+  setInterval(pollBlips,300);
+  setInterval(updateClock,10000);
+  setTimeout(initMap,200);
+});
 </script>
 </body>
 </html>
+
 )WEBAPP";
 			return page;
 		}

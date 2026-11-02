@@ -501,6 +501,62 @@ namespace Core
 						responseBody = "{\"status\": \"error\", \"message\": \"Missing name\"}";
 					}
 				}
+				else if (path.rfind("/mapStyles/", 0) == 0)
+				{
+					// Serve GTA V map tiles from WebRadar/static/
+					char exePath[MAX_PATH];
+					GetModuleFileNameA(NULL, exePath, MAX_PATH);
+					std::string exeDir(exePath);
+					size_t lastSlash = exeDir.find_last_of("\\/");
+					if (lastSlash != std::string::npos)
+						exeDir = exeDir.substr(0, lastSlash);
+
+					std::string tilePath = exeDir + "\\WebRadar\\static" + path;
+					// Sanitize: replace / with backslash
+					for (auto& c : tilePath)
+						if (c == '/') c = '\\';
+
+					FILE* tileFile = fopen(tilePath.c_str(), "rb");
+					if (!tileFile)
+					{
+						// Try empty tile fallback
+						std::string emptyPath = exeDir + "\\WebRadar\\static\\mapStyles\\styleAtlas\\empty.jpg";
+						tileFile = fopen(emptyPath.c_str(), "rb");
+					}
+
+					if (tileFile)
+					{
+						fseek(tileFile, 0, SEEK_END);
+						long fileSize = ftell(tileFile);
+						fseek(tileFile, 0, SEEK_SET);
+
+						std::vector<char> fileData(fileSize);
+						fread(fileData.data(), 1, fileSize, tileFile);
+						fclose(tileFile);
+
+						bool isPng = path.find(".png") != std::string::npos;
+						std::string tileContentType = isPng ? "image/png" : "image/jpeg";
+
+						std::ostringstream tileResp;
+						tileResp << "HTTP/1.1 200 OK\r\n";
+						tileResp << "Content-Type: " << tileContentType << "\r\n";
+						tileResp << "Content-Length: " << fileSize << "\r\n";
+						tileResp << "Cache-Control: public, max-age=86400\r\n";
+						tileResp << "Access-Control-Allow-Origin: *\r\n";
+						tileResp << "Connection: close\r\n\r\n";
+
+						std::string headerStr = tileResp.str();
+						send(clientSocket, headerStr.c_str(), (int)headerStr.length(), 0);
+						send(clientSocket, fileData.data(), (int)fileData.size(), 0);
+						closesocket(clientSocket);
+						return;
+					}
+					else
+					{
+						statusCode = 404;
+						responseBody = "{\"error\": \"Tile not found\"}";
+					}
+				}
 				else
 				{
 					statusCode = 404;
