@@ -278,7 +278,48 @@ namespace Core
 				ss << "  \"stamina\": " << (g_Config.Player->InfiniteStamina ? "true" : "false") << ",\n";
 				ss << "  \"ammo\": " << (g_Config.Player->InfiniteAmmoEnabled ? "true" : "false") << ",\n";
 				ss << "  \"norecoil\": " << (g_Config.Player->NoRecoilEnabled ? "true" : "false") << ",\n";
-				ss << "  \"nospread\": " << (g_Config.Player->NoSpreadEnabled ? "true" : "false") << "\n";
+				ss << "  \"nospread\": " << (g_Config.Player->NoSpreadEnabled ? "true" : "false") << ",\n";
+
+				// Combat extended
+				ss << "  \"aimbot_ignore_npcs\": " << (g_Config.Aimbot->IgnoreNPCs ? "true" : "false") << ",\n";
+				ss << "  \"aimbot_showfov\": " << (g_Config.Aimbot->ShowFov ? "true" : "false") << ",\n";
+				ss << "  \"silentaim_visible\": " << (g_Config.SilentAim->OnlyVisible ? "true" : "false") << ",\n";
+				ss << "  \"silentaim_magic\": " << (g_Config.SilentAim->MagicBullets ? "true" : "false") << ",\n";
+				ss << "  \"silentaim_ignore_npcs\": " << (g_Config.SilentAim->IgnoreNPCs ? "true" : "false") << ",\n";
+				ss << "  \"silentaim_showfov\": " << (g_Config.SilentAim->ShowFov ? "true" : "false") << ",\n";
+				ss << "  \"silentaim_miss\": " << g_Config.SilentAim->MissChance << ",\n";
+				ss << "  \"triggerbot_fov\": " << g_Config.TriggerBot->FOV << ",\n";
+				ss << "  \"triggerbot_distance\": " << g_Config.TriggerBot->MaxDistance << ",\n";
+				ss << "  \"triggerbot_delay\": " << g_Config.TriggerBot->Delay << ",\n";
+				ss << "  \"triggerbot_visible\": " << (g_Config.TriggerBot->OnlyVisible ? "true" : "false") << ",\n";
+				ss << "  \"triggerbot_ignore_npcs\": " << (g_Config.TriggerBot->IgnoreNPCs ? "true" : "false") << ",\n";
+				ss << "  \"triggerbot_smart\": " << (g_Config.TriggerBot->SmartTrigger ? "true" : "false") << ",\n";
+				ss << "  \"triggerbot_showfov\": " << (g_Config.TriggerBot->ShowFov ? "true" : "false") << ",\n";
+
+				// ESP extended
+				ss << "  \"esp_showlocal\": " << (g_Config.ESP->ShowLocalPlayer ? "true" : "false") << ",\n";
+				ss << "  \"esp_friends\": " << (g_Config.ESP->FriendsMarker ? "true" : "false") << ",\n";
+				ss << "  \"vehesp_lockunlock\": " << (g_Config.VehicleESP->ShowLockUnlock ? "true" : "false") << ",\n";
+				ss << "  \"vehesp_max_distance\": " << g_Config.VehicleESP->MaxDistance << ",\n";
+
+				// Player extended
+				ss << "  \"antihs\": " << (g_Config.Player->AntiHSEnabled ? "true" : "false") << ",\n";
+				ss << "  \"shrink\": " << (g_Config.Player->ShrinkEnabled ? "true" : "false") << ",\n";
+				ss << "  \"noragdoll\": " << (g_Config.Player->NoRagDollEnabled ? "true" : "false") << ",\n";
+				ss << "  \"stealcar\": " << (g_Config.Player->StealCarEnabled ? "true" : "false") << ",\n";
+				ss << "  \"combatroll\": " << (g_Config.Player->InfiniteCombatRoll ? "true" : "false") << ",\n";
+				ss << "  \"weaponwheel\": " << (g_Config.Player->ForceWeaponWheel ? "true" : "false") << ",\n";
+				ss << "  \"noreload\": " << (g_Config.Player->NoReloadEnabled ? "true" : "false") << ",\n";
+				ss << "  \"veh_godmode\": " << (g_Config.Player->VehicleGodMode ? "true" : "false") << ",\n";
+				ss << "  \"seatbelt\": " << (g_Config.Player->SeatBelt ? "true" : "false") << ",\n";
+				ss << "  \"fastrun_speed\": " << g_Config.Player->RunSpeed << ",\n";
+				ss << "  \"autopeek\": " << (g_Config.Player->AutoPeekEnabled ? "true" : "false") << ",\n";
+
+				// General
+				ss << "  \"watermark\": " << (g_Config.General->WaterMark ? "true" : "false") << ",\n";
+				ss << "  \"streamproof\": " << (g_Config.General->StreamProof ? "true" : "false") << ",\n";
+				ss << "  \"web_enabled\": " << (g_Config.Web->Enabled ? "true" : "false") << ",\n";
+				ss << "  \"web_cloudsync\": " << (g_Config.Web->CloudSync ? "true" : "false") << "\n";
 				ss << "}";
 				return ss.str();
 			}

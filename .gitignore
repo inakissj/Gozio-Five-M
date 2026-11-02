@@ -44,3 +44,6 @@ desktop.ini
 
 # p4m build output
 p4m/
+
+# Claude Code
+.claude/
