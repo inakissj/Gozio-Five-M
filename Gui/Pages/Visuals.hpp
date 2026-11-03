@@ -125,13 +125,40 @@ namespace Visuals {
 
                         ImGui::SliderInt(xorstr("Max Distance"), &g_Config.ESP->MaxDistance, 0, 1000, xorstr("%dm"), 0);
 
-                        Custom::CheckBox(xorstr("Web Map Radar"), &g_Config.Web->Enabled);
-                        if (Custom::Button(xorstr("Open GTA Map Radar (Web)"), ImVec2(-1, 30), 0))
+                        ImGui::Separator();
+                        ImGui::Spacing();
+                        ImGui::TextDisabled(xorstr("WEB PANEL"));
+                        ImGui::Spacing();
+
+                        Custom::CheckBox(xorstr("Enable Web Panel"), &g_Config.Web->Enabled);
+
                         {
-                            if (!Core::Web::g_WebServer.IsRunning())
-                                Core::Web::g_WebServer.Start(g_Config.Web->Port);
-                            std::string url = xorstr("http://localhost:") + std::to_string(Core::Web::g_WebServer.GetPort());
-                            ShellExecuteA(NULL, xorstr("open"), url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+                            bool webRunning = Core::Web::g_WebServer.IsRunning();
+                            int webPort = webRunning ? Core::Web::g_WebServer.GetPort() : g_Config.Web->Port;
+                            if (webPort <= 0 || webPort > 65535) webPort = 8080;
+
+                            ImGui::TextColored(webRunning ? ImVec4(0.3f, 0.9f, 0.4f, 1.f) : ImVec4(0.9f, 0.4f, 0.4f, 1.f),
+                                xorstr("Status: %s"), webRunning ? xorstr("Running") : xorstr("Stopped"));
+                            ImGui::SameLine();
+                            ImGui::TextDisabled(xorstr("Port %d"), webPort);
+
+                            if (Custom::Button(xorstr("Open Web Panel in Browser"), ImVec2(-1, 30), 0))
+                            {
+                                try
+                                {
+                                    if (!Core::Web::g_WebServer.IsRunning())
+                                    {
+                                        Core::Web::g_WebServer.Start(webPort);
+                                        Sleep(150);
+                                    }
+                                    int portNow = Core::Web::g_WebServer.GetPort();
+                                    if (portNow <= 0) portNow = webPort;
+                                    char urlBuf[64];
+                                    sprintf_s(urlBuf, sizeof(urlBuf), "http://localhost:%d", portNow);
+                                    ShellExecuteA(NULL, "open", urlBuf, NULL, NULL, SW_SHOWNORMAL);
+                                }
+                                catch (...) {}
+                            }
                         }
 
                     }

@@ -326,7 +326,7 @@ function initGtaMap() {
 
   gtaMap = L.map(container, {
     crs,
-    minZoom: 3,
+    minZoom: 1,
     maxZoom: 7,
     zoom: 3,
     zoomSnap: 0.25,
@@ -365,16 +365,32 @@ function initGtaMap() {
     setSelectedWaypoint(wx, wy, 35.0, 'Map Waypoint');
   });
 
-  requestAnimationFrame(() => {
-    gtaMap.invalidateSize();
-    gtaMap.fitBounds(gtaTileBounds, { padding: [0, 0], animate: false });
-  });
-
-  // Keep the map fitted on viewport resize
-  window.addEventListener('resize', () => {
+  const refitMapToViewport = () => {
     if (!gtaMap) return;
     gtaMap.invalidateSize();
+    gtaMap.fitBounds(gtaTileBounds, { padding: [0, 0], animate: false });
+  };
+
+  requestAnimationFrame(refitMapToViewport);
+  setTimeout(refitMapToViewport, 300);
+
+  // Keep the map fitted on viewport resize
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(refitMapToViewport, 100);
   });
+
+  // Also refit when the Radar page becomes visible after being hidden
+  if (window.ResizeObserver) {
+    try {
+      const ro = new ResizeObserver(() => {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(refitMapToViewport, 100);
+      });
+      ro.observe(container);
+    } catch (e) {}
+  }
 }
 
 function setMapStyle(style) {
