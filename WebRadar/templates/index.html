@@ -3,658 +3,1379 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <meta name="description" content="p4m Telemetry & Cartography Console — Authentic GTA V interactive map, real-time session radar, and remote configuration interface." />
-  <meta name="theme-color" content="#0b0c0e" />
-  <title>p4m — GTA V Cartography &amp; Telemetry Console</title>
+  <title>Gozio — Web Panel &amp; Live GTA V Radar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/vendor/leaflet.css" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/vendor/leaflet.css?v=gozio_v1" />
+  <link rel="stylesheet" href="/static/style.css?v=gozio_v1" />
 </head>
 <body>
-  <!-- ===================================================================== -->
-  <!-- TOP APPLICATION HEADER                                                -->
-  <!-- ===================================================================== -->
-  <header class="app-header" role="banner">
-    <div class="header-left">
-      <div class="brand-lockup">
-        <span class="brand-mark" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
-            <line x1="12" y1="22" x2="12" y2="15.5"></line>
-            <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+  <div class="app-layout">
+    <!-- ====================================================================
+         LEFT SIDEBAR (Exact Gozio Web Panel Sidebar — Video 80s-162s)
+         ==================================================================== -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <div class="brand-wrap" onclick="switchPage('radar')">
+          <div class="st-badge">ST</div>
+          <div class="brand-text">
+            <span class="brand-name">Gozio</span>
+            <span class="brand-sub">WEB PANEL</span>
+          </div>
+        </div>
+        <button type="button" class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Toggle sidebar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
           </svg>
-        </span>
-        <span class="brand-name">p4m</span>
-        <span class="brand-divider" aria-hidden="true">/</span>
-        <span class="brand-title">San Andreas Cartography &amp; Telemetry</span>
+        </button>
       </div>
 
-      <div class="telemetry-status" id="conn-pill" role="status" aria-live="polite">
-        <span class="status-indicator" id="conn-dot"></span>
-        <span class="status-label" id="conn-text">Initializing link...</span>
+      <nav class="sidebar-scroll" aria-label="Gozio Web Panel Navigation">
+        <!-- Dashboard -->
+        <button type="button" class="nav-top-item" data-page="dashboard" onclick="switchPage('dashboard')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+          </svg>
+          <span class="nav-label">Dashboard</span>
+        </button>
+
+        <!-- Menu Group -->
+        <div class="nav-group" id="nav-group-menu">
+          <button type="button" class="nav-group-btn" onclick="toggleMenuGroup()">
+            <span class="nav-group-left">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="6" width="20" height="12" rx="3"></rect>
+                <line x1="6" y1="12" x2="10" y2="12"></line>
+                <line x1="8" y1="10" x2="8" y2="14"></line>
+                <circle cx="15" cy="11" r="1"></circle>
+                <circle cx="18" cy="13" r="1"></circle>
+              </svg>
+              <span class="nav-label">Menu</span>
+            </span>
+            <svg class="nav-group-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="nav-tree">
+            <button type="button" class="nav-sub-item" data-page="legitbot" onclick="switchPage('legitbot')">Legitbot</button>
+            <button type="button" class="nav-sub-item" data-page="esp_players" onclick="switchPage('esp_players')">ESP Players</button>
+            <button type="button" class="nav-sub-item" data-page="esp_vehicles" onclick="switchPage('esp_vehicles')">ESP Vehicles</button>
+            <button type="button" class="nav-sub-item" data-page="misc_esp" onclick="switchPage('misc_esp')">Misc ESP</button>
+            <button type="button" class="nav-sub-item" data-page="esp_preview" onclick="switchPage('esp_preview')">ESP Preview</button>
+            <button type="button" class="nav-sub-item active" data-page="radar" onclick="switchPage('radar')">Radar</button>
+            <button type="button" class="nav-sub-item" data-page="players" onclick="switchPage('players')">Players</button>
+            <button type="button" class="nav-sub-item" data-page="vehicles" onclick="switchPage('vehicles')">Vehicles</button>
+            <button type="button" class="nav-sub-item" data-page="resources" onclick="switchPage('resources')">Resources</button>
+            <button type="button" class="nav-sub-item" data-page="exploits" onclick="switchPage('exploits')">Exploits</button>
+            <button type="button" class="nav-sub-item" data-page="settings" onclick="switchPage('settings')">Settings</button>
+          </div>
+        </div>
+
+        <!-- Configs -->
+        <button type="button" class="nav-top-item" data-page="configs" onclick="switchPage('configs')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="3.5"></circle>
+            <circle cx="7.5" cy="15.5" r="3.5"></circle>
+            <circle cx="16.5" cy="15.5" r="3.5"></circle>
+          </svg>
+          <span class="nav-label">Configs</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer: Pacho123 Online -->
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="user-avatar-discord" title="Discord Connected">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09-.01-.02-.04-.03-.07-.03-1.5.26-2.93.71-4.27 1.33-.01 0-.02.01-.03.02-2.72 4.07-3.47 8.03-3.1 11.95 0 .02.01.04.03.05 1.8 1.32 3.53 2.12 5.24 2.65.03.01.06 0 .07-.02.4-.55.76-1.13 1.07-1.74.02-.04 0-.08-.04-.09-.57-.22-1.11-.48-1.64-.78-.04-.02-.04-.08-.01-.11.11-.08.22-.17.33-.25.02-.02.05-.02.07-.01 3.44 1.57 7.15 1.57 10.55 0 .02-.01.05-.01.07.01.11.09.22.17.33.26.04.03.04.09-.01.11-.52.31-1.07.56-1.64.78-.04.01-.05.06-.04.09.32.61.68 1.19 1.07 1.74.03.01.06.02.09.01 1.72-.53 3.45-1.33 5.25-2.65.02-.01.03-.03.03-.05.44-4.53-.73-8.46-3.1-11.95-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.83 2.12-1.89 2.12z"/>
+            </svg>
+          </div>
+          <div class="user-meta">
+            <span class="user-name">Pacho123</span>
+            <span class="user-status"><span class="user-status-dot"></span> Online</span>
+          </div>
+        </div>
+        <button type="button" class="sidebar-collapse-btn" onclick="switchPage('settings')" title="Session &amp; Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
       </div>
-    </div>
+    </aside>
 
-    <nav class="primary-nav" aria-label="Workspace views">
-      <button type="button" class="nav-tab active" data-tab="map" onclick="switchTab('map', this)" aria-current="page">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
-          <line x1="8" y1="2" x2="8" y2="18"></line>
-          <line x1="16" y1="6" x2="16" y2="22"></line>
-        </svg>
-        <span>World Map</span>
-        <kbd class="nav-kbd">1</kbd>
-      </button>
+    <!-- ====================================================================
+         MAIN COLUMN: Topbar + Page Views
+         ==================================================================== -->
+    <div class="main-col">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="mobile-menu-btn" onclick="toggleSidebarCollapse()" aria-label="Open menu">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <span class="topbar-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="6" width="20" height="12" rx="3"></rect>
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <circle cx="15" cy="11" r="1"></circle>
+              <circle cx="18" cy="13" r="1"></circle>
+            </svg>
+          </span>
+          <span class="topbar-title" id="topbar-title">Radar</span>
+          <span class="topbar-divider"></span>
+          <span class="topbar-sub" id="topbar-sub">Live map of the session</span>
+        </div>
 
-      <button type="button" class="nav-tab" data-tab="config" onclick="switchTab('config', this)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="4" y1="21" x2="4" y2="14"></line>
-          <line x1="4" y1="10" x2="4" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12" y2="3"></line>
-          <line x1="20" y1="21" x2="20" y2="16"></line>
-          <line x1="20" y1="12" x2="20" y2="3"></line>
-          <line x1="1" y1="14" x2="7" y2="14"></line>
-          <line x1="9" y1="8" x2="15" y2="8"></line>
-          <line x1="17" y1="16" x2="23" y2="16"></line>
-        </svg>
-        <span>Parameters</span>
-        <kbd class="nav-kbd">2</kbd>
-      </button>
+        <div class="topbar-right">
+          <div class="saving-indicator" id="saving-pill">
+            <span>• Saving...</span>
+          </div>
+          <div class="live-pill" id="topbar-live-pill">
+            <span class="live-pill-dot" id="conn-dot"></span>
+            <span id="conn-text">Live</span>
+          </div>
+          <button type="button" class="topbar-btn" onclick="switchPage('configs')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>Presets</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="topbar-search">
+            <svg class="topbar-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="search"
+              id="global-search-input"
+              placeholder="Search..."
+              autocomplete="off"
+              oninput="handleGlobalSearch(this.value)"
+            />
+            <span class="kbd-badge">Ctrl K</span>
+          </div>
+          <button type="button" class="sidebar-collapse-btn" onclick="exportWebConfig()" title="Export Config JSON">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
 
-      <button type="button" class="nav-tab" data-tab="admins" onclick="switchTab('admins', this)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-        </svg>
-        <span>Watchlist</span>
-        <span class="nav-counter alert" id="nav-admin-count">0</span>
-      </button>
+      <!-- ==================================================================
+           PAGES STAGE
+           ================================================================== -->
+      <main class="pages-stage">
 
-      <button type="button" class="nav-tab" data-tab="entities" onclick="switchTab('entities', this)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-        <span>Entities</span>
-        <span class="nav-counter" id="nav-entity-count">0</span>
-      </button>
-    </nav>
+        <!-- ================================================================
+             1. RADAR PAGE (DEFAULT ACTIVE — Exact Frame 80s, 130s, 136s, 139s)
+             ================================================================ -->
+        <section class="page-view page-radar-view active" id="page-radar">
+          <div class="radar-workspace" id="map-viewport">
+            <!-- Top-Left Pill Bar: Atlas | Satellite | Grid | Names -->
+            <div class="radar-top-pills" role="group" aria-label="Map style and labels">
+              <button type="button" class="radar-pill-btn active" id="style-btn-atlas" onclick="setMapStyle('atlas')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                  <line x1="8" y1="2" x2="8" y2="18"></line>
+                  <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
+                <span>Atlas</span>
+              </button>
+              <button type="button" class="radar-pill-btn" id="style-btn-satellite" onclick="setMapStyle('satellite')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span>Satellite</span>
+              </button>
+              <button type="button" class="radar-pill-btn" id="style-btn-grid" onclick="setMapStyle('grid')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <line x1="3" y1="9" x2="21" y2="9"></line>
+                  <line x1="3" y1="15" x2="21" y2="15"></line>
+                  <line x1="9" y1="3" x2="9" y2="21"></line>
+                  <line x1="15" y1="3" x2="15" y2="21"></line>
+                </svg>
+                <span>Grid</span>
+              </button>
+              <span class="radar-pill-sep"></span>
+              <button type="button" class="radar-pill-btn active" id="pill-toggle-names" onclick="toggleMapNames()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                <span>Names</span>
+              </button>
+            </div>
 
-    <div class="header-right">
-      <div class="cursor-readout" aria-label="Cursor GTA V World Coordinates">
-        <span class="coord-tag">CURSOR</span>
-        <span class="coord-mono" id="cursor-coords">X: 0.0 · Y: 0.0</span>
-      </div>
+            <!-- Live Cursor Coordinates Pill (X 1217 · Y 1160) -->
+            <div class="radar-coords-pill" id="cursor-coords">X 215 · Y -810</div>
 
-      <button type="button" class="btn-icon mobile-drawer-toggle" id="btn-toggle-sidebar" onclick="toggleInspectorSidebar()" aria-label="Toggle Inspector Panel" title="Toggle Inspector Panel">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="15" y1="3" x2="15" y2="21"></line>
-        </svg>
-      </button>
-    </div>
-  </header>
+            <!-- Floating Live Status Pill -->
+            <div class="radar-live-floating">
+              <div class="live-pill">
+                <span class="live-pill-dot"></span>
+                <span id="radar-live-lbl">Live</span>
+              </div>
+            </div>
 
-  <!-- ===================================================================== -->
-  <!-- PRIORITY ADMIN DETECTION BAR (VISIBLE ONLY WHEN FLAGGED IN SESSION)   -->
-  <!-- ===================================================================== -->
-  <div class="priority-banner" id="admin-alert-bar" role="alert" style="display: none;">
-    <div class="banner-inner">
-      <span class="banner-dot"></span>
-      <strong class="banner-title">WATCHLIST ENTITY DETECTED IN SESSION</strong>
-      <span class="banner-sep">—</span>
-      <span class="banner-detail" id="admin-alert-names">None</span>
+            <!-- Right-Side Docked Players & Teleport Card (Exact Frame 80s / 136s) -->
+            <aside class="radar-players-card" aria-label="Session players and map follow">
+              <div class="rpc-header">
+                <div class="rpc-title-group">
+                  <div class="rpc-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="9"></circle>
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <line x1="12" y1="3" x2="12" y2="6"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="rpc-title">Players</div>
+                    <div class="rpc-sub">Pick one to follow on the map</div>
+                  </div>
+                </div>
+                <div class="rpc-count">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                  </svg>
+                  <span id="radar-player-count">1</span>
+                </div>
+              </div>
+
+              <div class="rpc-search">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input
+                  type="search"
+                  id="radar-player-search"
+                  placeholder="Search players..."
+                  autocomplete="off"
+                  oninput="renderRadarPlayersList()"
+                />
+              </div>
+
+              <div class="rpc-list" id="radar-players-list">
+                <!-- Populated dynamically with Local player (You) + session players -->
+              </div>
+
+              <!-- Selected Waypoint Quick Action (shown when map is clicked) -->
+              <div id="waypoint-card" style="display:none;flex-direction:column;gap:6px;padding:10px;border-radius:8px;background:#0f0f0f;border:1px solid #262626;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span id="wp-label" style="font-size:11px;font-weight:700;color:#fff;">SELECTED WAYPOINT</span>
+                  <button type="button" onclick="clearWaypoint()" style="background:none;border:none;color:#71717a;cursor:pointer;font-size:11px;">✕</button>
+                </div>
+                <div id="wp-coords" style="font-family:var(--font-mono);font-size:10.5px;color:#a1a1aa;">X: 0.0, Y: 0.0, Z: 35.0</div>
+                <button type="button" class="tp-waypoint-wide-btn" style="height:30px;font-size:11px;" onclick="teleportToSelectedWaypoint()">
+                  ◁ Teleport to waypoint
+                </button>
+              </div>
+
+              <div class="rpc-divider"></div>
+
+              <!-- Fast GTA V Landmark Teleport Directory -->
+              <div class="rpc-section-lbl">
+                <span>GTA V Landmarks</span>
+                <span id="poi-count-label">24</span>
+              </div>
+              <div class="rpc-landmarks" id="landmark-directory"></div>
+            </aside>
+
+            <!-- Authentic Rockstar GTA V Multi-Zoom Leaflet Canvas -->
+            <div id="gta-leaflet-map" role="region" aria-label="Authentic Grand Theft Auto V World Map"></div>
+
+            <!-- Bottom-Right Vertical Zoom Bar -->
+            <div class="radar-zoom-bar">
+              <button type="button" class="radar-zoom-btn" onclick="zoomMapIn()" title="Zoom in">+</button>
+              <button type="button" class="radar-zoom-btn" onclick="zoomMapOut()" title="Zoom out">&minus;</button>
+              <button type="button" class="radar-zoom-btn" onclick="recenterOnLocal()" title="Center on player" style="font-size:12px;">◎</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             2. LEGITBOT PAGE (Exact Frame 86s: Legitbot | Silent | Trigger)
+             ================================================================ -->
+        <section class="page-view" id="page-legitbot">
+          <div class="grid-3col">
+            <!-- Col 1: Legitbot -->
+            <article class="panel-card" data-searchable="legitbot aimbot fov smooth bone visible check magic bullet fiveguard bypass">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <span class="card-head-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="card-title">Legitbot</div>
+                    <div class="card-subtitle">Legit aim control</div>
+                  </div>
+                </div>
+                <label class="sw">
+                  <input type="checkbox" id="cfg-aimbot_enabled" onchange="setConfigValue('aimbot_enabled', this.checked)" />
+                  <span class="sw-track"></span>
+                </label>
+              </div>
+              <div class="card-body">
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Show FOV</span>
+                    <label class="sw">
+                      <input type="checkbox" id="cfg-aimbot_showfov" onchange="setConfigValue('aimbot_showfov', this.checked)" />
+                      <span class="sw-track"></span>
+                    </label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Visible check</span>
+                    <label class="sw">
+                      <input type="checkbox" id="cfg-aimbot_visible" onchange="setConfigValue('aimbot_visible', this.checked)" />
+                      <span class="sw-track"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="row-2col">
+                  <div class="slider-block">
+                    <div class="slider-top"><span>FOV</span><span class="slider-val" id="val-aimbot_fov">80</span></div>
+                    <input type="range" class="wp-range" id="cfg-aimbot_fov" min="1" max="400" value="80" oninput="syncRangeVisual(this, 'val-aimbot_fov', '')" onchange="setConfigValue('aimbot_fov', this.value)" />
+                  </div>
+                  <div class="slider-block">
+                    <div class="slider-top"><span>Distance</span><span class="slider-val" id="val-aimbot_distance">500m</span></div>
+                    <input type="range" class="wp-range" id="cfg-aimbot_distance" min="10" max="1000" value="500" oninput="syncRangeVisual(this, 'val-aimbot_distance', 'm')" onchange="setConfigValue('aimbot_distance', this.value)" />
+                  </div>
+                </div>
+
+                <div class="row-2col">
+                  <div class="slider-block">
+                    <div class="slider-top"><span>Smooth</span><span class="slider-val" id="val-aimbot_speed">30</span></div>
+                    <input type="range" class="wp-range" id="cfg-aimbot_speed" min="1" max="100" value="30" oninput="syncRangeVisual(this, 'val-aimbot_speed', '')" onchange="setConfigValue('aimbot_speed', this.value)" />
+                  </div>
+                  <div class="field-block">
+                    <span class="field-lbl">Bone</span>
+                    <select class="wp-select">
+                      <option value="head">Head</option>
+                      <option value="neck">Neck</option>
+                      <option value="chest">Chest</option>
+                      <option value="pelvis">Pelvis</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="subsec-header"><span>⌄ Hotkey</span></div>
+                <div class="row-2col">
+                  <div class="field-block">
+                    <span class="field-lbl">Bind</span>
+                    <button type="button" class="wp-keybind-btn" onclick="bindKeyPrompt(this, 'legitbot_key')">Not set</button>
+                  </div>
+                  <div class="field-block">
+                    <span class="field-lbl">Mode</span>
+                    <select class="wp-select"><option>Toggle</option><option>Hold</option></select>
+                  </div>
+                </div>
+
+                <div class="subsec-header"><span>⌄ Advanced</span><span class="subsec-count">1</span></div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Ignore dead</span>
+                  <label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label>
+                </div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Ignore ped</span>
+                  <label class="sw"><input type="checkbox" id="cfg-aimbot_ignore_npcs" onchange="setConfigValue('aimbot_ignore_npcs', this.checked)" /><span class="sw-track"></span></label>
+                </div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Magic bullet</span>
+                  <label class="sw"><input type="checkbox" /><span class="sw-track"></span></label>
+                </div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">FiveGuard bypass</span>
+                  <label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label>
+                </div>
+              </div>
+            </article>
+
+            <!-- Col 2: Silent -->
+            <article class="panel-card" data-searchable="silent aim shot redirection hit chance magic bullet anti-silent bypass">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <span class="card-head-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="card-title">Silent</div>
+                    <div class="card-subtitle">Shot redirection</div>
+                  </div>
+                </div>
+                <label class="sw">
+                  <input type="checkbox" id="cfg-silentaim_enabled" onchange="setConfigValue('silentaim_enabled', this.checked)" />
+                  <span class="sw-track"></span>
+                </label>
+              </div>
+              <div class="card-body">
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Show FOV</span>
+                    <label class="sw">
+                      <input type="checkbox" id="cfg-silentaim_showfov" onchange="setConfigValue('silentaim_showfov', this.checked)" />
+                      <span class="sw-track"></span>
+                    </label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Visible check</span>
+                    <label class="sw">
+                      <input type="checkbox" id="cfg-silentaim_visible" onchange="setConfigValue('silentaim_visible', this.checked)" />
+                      <span class="sw-track"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Legit FOV mode</span>
+                  <label class="sw"><input type="checkbox" /><span class="sw-track"></span></label>
+                </div>
+
+                <div class="row-2col">
+                  <div class="slider-block">
+                    <div class="slider-top"><span>FOV</span><span class="slider-val" id="val-silentaim_fov">40</span></div>
+                    <input type="range" class="wp-range" id="cfg-silentaim_fov" min="1" max="400" value="40" oninput="syncRangeVisual(this, 'val-silentaim_fov', '')" onchange="setConfigValue('silentaim_fov', this.value)" />
+                  </div>
+                  <div class="slider-block">
+                    <div class="slider-top"><span>Distance</span><span class="slider-val" id="val-silentaim_distance">500m</span></div>
+                    <input type="range" class="wp-range" id="cfg-silentaim_distance" min="10" max="1000" value="500" oninput="syncRangeVisual(this, 'val-silentaim_distance', 'm')" onchange="setConfigValue('silentaim_distance', this.value)" />
+                  </div>
+                </div>
+
+                <div class="field-block">
+                  <span class="field-lbl">Bone</span>
+                  <select class="wp-select">
+                    <option value="head">Head</option>
+                    <option value="neck">Neck</option>
+                    <option value="chest">Chest</option>
+                  </select>
+                </div>
+
+                <div class="subsec-header"><span>⌄ Hotkey + hit chance</span></div>
+                <div class="row-2col">
+                  <div class="field-block">
+                    <span class="field-lbl">Bind</span>
+                    <button type="button" class="wp-keybind-btn" onclick="bindKeyPrompt(this, 'silent_key')">Not set</button>
+                  </div>
+                  <div class="field-block">
+                    <span class="field-lbl">Mode</span>
+                    <select class="wp-select"><option>Toggle</option><option>Hold</option></select>
+                  </div>
+                </div>
+
+                <div class="slider-block">
+                  <div class="slider-top"><span>Hit chance</span><span class="slider-val" id="val-silentaim_miss">50%</span></div>
+                  <input type="range" class="wp-range" id="cfg-silentaim_miss" min="0" max="100" value="50" oninput="syncRangeVisual(this, 'val-silentaim_miss', '%')" onchange="setConfigValue('silentaim_miss', this.value)" />
+                </div>
+
+                <div class="subsec-header"><span>⌄ Advanced</span><span class="subsec-count">1</span></div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Ignore dead</span>
+                  <label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label>
+                </div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Ignore ped</span>
+                  <label class="sw"><input type="checkbox" id="cfg-silentaim_ignore_npcs" onchange="setConfigValue('silentaim_ignore_npcs', this.checked)" /><span class="sw-track"></span></label>
+                </div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Magic bullet</span>
+                  <label class="sw"><input type="checkbox" id="cfg-silentaim_magic" onchange="setConfigValue('silentaim_magic', this.checked)" /><span class="sw-track"></span></label>
+                </div>
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Anti-silent bypass</span>
+                  <label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label>
+                </div>
+              </div>
+            </article>
+
+            <!-- Col 3: Trigger -->
+            <article class="panel-card" data-searchable="triggerbot auto fire delay distance visible check">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <span class="card-head-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="card-title">Trigger</div>
+                    <div class="card-subtitle">Auto fire rules</div>
+                  </div>
+                </div>
+                <label class="sw">
+                  <input type="checkbox" id="cfg-triggerbot_enabled" onchange="setConfigValue('triggerbot_enabled', this.checked)" />
+                  <span class="sw-track"></span>
+                </label>
+              </div>
+              <div class="card-body">
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Ignore dead</span>
+                    <label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Ignore ped</span>
+                    <label class="sw"><input type="checkbox" id="cfg-triggerbot_ignore_npcs" onchange="setConfigValue('triggerbot_ignore_npcs', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+
+                <div class="ctrl-row">
+                  <span class="ctrl-label">Visible check</span>
+                  <label class="sw"><input type="checkbox" id="cfg-triggerbot_visible" onchange="setConfigValue('triggerbot_visible', this.checked)" /><span class="sw-track"></span></label>
+                </div>
+
+                <div class="row-2col">
+                  <div class="slider-block">
+                    <div class="slider-top"><span>Delay</span><span class="slider-val" id="val-triggerbot_delay">0ms</span></div>
+                    <input type="range" class="wp-range" id="cfg-triggerbot_delay" min="0" max="50" value="0" oninput="syncRangeVisual(this, 'val-triggerbot_delay', 'ms')" onchange="setConfigValue('triggerbot_delay', this.value)" />
+                  </div>
+                  <div class="slider-block">
+                    <div class="slider-top"><span>Distance</span><span class="slider-val" id="val-triggerbot_distance">500m</span></div>
+                    <input type="range" class="wp-range" id="cfg-triggerbot_distance" min="10" max="1000" value="500" oninput="syncRangeVisual(this, 'val-triggerbot_distance', 'm')" onchange="setConfigValue('triggerbot_distance', this.value)" />
+                  </div>
+                </div>
+
+                <div class="subsec-header"><span>⌄ Hotkey</span></div>
+                <div class="row-2col">
+                  <div class="field-block">
+                    <span class="field-lbl">Bind</span>
+                    <button type="button" class="wp-keybind-btn" onclick="bindKeyPrompt(this, 'trigger_key')">Not set</button>
+                  </div>
+                  <div class="field-block">
+                    <span class="field-lbl">Mode</span>
+                    <select class="wp-select"><option>Toggle</option><option>Hold</option></select>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             3. ESP PLAYERS PAGE (Exact Frame 91s / 93s)
+             ================================================================ -->
+        <section class="page-view" id="page-esp_players">
+          <div class="grid-2col">
+            <article class="panel-card" data-searchable="esp players skeleton box lines name weapon distance bars colors admin esp">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <div>
+                    <div class="card-title">ESP Players</div>
+                    <div class="card-subtitle">Player overlay</div>
+                  </div>
+                </div>
+                <label class="sw">
+                  <input type="checkbox" id="cfg-esp_enabled" onchange="setConfigValue('esp_enabled', this.checked)" />
+                  <span class="sw-track"></span>
+                </label>
+              </div>
+              <div class="card-body">
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Skeleton</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_skeleton" onchange="setConfigValue('esp_skeleton', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Box</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_box" onchange="setConfigValue('esp_box', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Lines</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_snaplines" onchange="setConfigValue('esp_snaplines', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Name</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_names" onchange="setConfigValue('esp_names', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Weapon</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_weapon" onchange="setConfigValue('esp_weapon', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Distance</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_distance" onchange="setConfigValue('esp_distance', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+
+                <div class="subsec-header"><span>⌄ Bars</span><span class="subsec-count">2</span></div>
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Health bar</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_health" onchange="setConfigValue('esp_health', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Armor bar</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_armor" onchange="setConfigValue('esp_armor', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+
+                <div class="subsec-header"><span>⌄ Admin ESP</span></div>
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Highlight Admins</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_admin" onchange="setConfigValue('esp_admin', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Admin Rainbow</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_admin_rainbow" onchange="setConfigValue('esp_admin_rainbow', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Max distance</span><span class="slider-val" id="val-esp_max_distance">500m</span></div>
+                  <input type="range" class="wp-range" id="cfg-esp_max_distance" min="10" max="1000" value="500" oninput="syncRangeVisual(this, 'val-esp_max_distance', 'm')" onchange="setConfigValue('esp_max_distance', this.value)" />
+                </div>
+              </div>
+            </article>
+
+            <!-- Col 2: Ignore & Watchlist Management -->
+            <div class="col-stack">
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Ignore</div>
+                    <div class="card-subtitle">Entity filtering rules</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row-2col">
+                    <div class="ctrl-row">
+                      <span class="ctrl-label">Ignore dead</span>
+                      <label class="sw"><input type="checkbox" id="cfg-esp_ignore_dead" onchange="setConfigValue('esp_ignore_dead', this.checked)" /><span class="sw-track"></span></label>
+                    </div>
+                    <div class="ctrl-row">
+                      <span class="ctrl-label">Ignore ped</span>
+                      <label class="sw"><input type="checkbox" id="cfg-esp_ignore_npcs" onchange="setConfigValue('esp_ignore_npcs', this.checked)" /><span class="sw-track"></span></label>
+                    </div>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Show local player</span>
+                    <label class="sw"><input type="checkbox" id="cfg-esp_showlocal" onchange="setConfigValue('esp_showlocal', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+              </article>
+
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Admin Watchlist</div>
+                    <div class="card-subtitle">Flagged administrator identifiers</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div style="display:flex;gap:8px;">
+                    <input type="text" id="admin-input" class="wp-input" placeholder="Add admin name or tag..." onkeydown="if(event.key==='Enter') addAdminWatch()" />
+                    <button type="button" class="white-cta-btn" onclick="addAdminWatch()">Add</button>
+                  </div>
+                  <div id="watchlist-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             4. ESP VEHICLES PAGE
+             ================================================================ -->
+        <section class="page-view" id="page-esp_vehicles">
+          <div class="grid-2col">
+            <article class="panel-card" data-searchable="esp vehicles names locked snaplines distance">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">ESP Vehicles</div>
+                  <div class="card-subtitle">Vehicle overlay</div>
+                </div>
+                <label class="sw">
+                  <input type="checkbox" id="cfg-vehesp_enabled" onchange="setConfigValue('vehesp_enabled', this.checked)" />
+                  <span class="sw-track"></span>
+                </label>
+              </div>
+              <div class="card-body">
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Vehicle names</span>
+                    <label class="sw"><input type="checkbox" id="cfg-vehesp_names" onchange="setConfigValue('vehesp_names', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Locked / Unlocked</span>
+                    <label class="sw"><input type="checkbox" id="cfg-vehesp_lockunlock" onchange="setConfigValue('vehesp_lockunlock', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+                <div class="row-2col">
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Snaplines</span>
+                    <label class="sw"><input type="checkbox" id="cfg-vehesp_snaplines" onchange="setConfigValue('vehesp_snaplines', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <span class="ctrl-label">Distance</span>
+                    <label class="sw"><input type="checkbox" id="cfg-vehesp_distance" onchange="setConfigValue('vehesp_distance', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Max distance</span><span class="slider-val" id="val-vehesp_max_distance">500m</span></div>
+                  <input type="range" class="wp-range" id="cfg-vehesp_max_distance" min="10" max="1000" value="500" oninput="syncRangeVisual(this, 'val-vehesp_max_distance', 'm')" onchange="setConfigValue('vehesp_max_distance', this.value)" />
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             5. MISC ESP PAGE (Exact Frame 95s: Overlay, Radar, Watermark, HUD)
+             ================================================================ -->
+        <section class="page-view" id="page-misc_esp">
+          <div class="grid-4col">
+            <div class="col-stack">
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Overlay</div>
+                    <div class="card-subtitle">Master switch for every Misc overlay</div>
+                  </div>
+                  <label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label>
+                </div>
+                <div class="card-body">
+                  <div class="ctrl-row">
+                    <div>
+                      <span class="ctrl-label">Player counter</span>
+                      <span class="ctrl-sub">Pill with the enemy / friend split</span>
+                    </div>
+                    <label class="sw"><input type="checkbox" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+              </article>
+
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Crosshair</div>
+                    <div class="card-subtitle">Always at screen centre</div>
+                  </div>
+                  <label class="sw"><input type="checkbox" /><span class="sw-track"></span></label>
+                </div>
+                <div class="card-body">
+                  <div class="field-block">
+                    <span class="field-lbl">Style</span>
+                    <select class="wp-select"><option>Plus</option><option>Dot</option><option>Circle</option></select>
+                  </div>
+                  <div class="slider-block">
+                    <div class="slider-top"><span>Size</span><span class="slider-val" id="val-ch-size">10.0px</span></div>
+                    <input type="range" class="wp-range" min="2" max="30" step="0.5" value="10" oninput="syncRangeVisual(this, 'val-ch-size', 'px')" />
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <article class="panel-card">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">Radar</div>
+                  <div class="card-subtitle">Draggable minimap</div>
+                </div>
+                <label class="sw"><input type="checkbox" id="cfg-web_enabled" onchange="setConfigValue('web_enabled', this.checked)" /><span class="sw-track"></span></label>
+              </div>
+              <div class="card-body">
+                <div class="field-block">
+                  <span class="field-lbl">Shape</span>
+                  <select class="wp-select"><option>Circle</option><option>Square</option></select>
+                </div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Size</span><span class="slider-val" id="val-rad-sz">220px</span></div>
+                  <input type="range" class="wp-range" min="120" max="400" value="220" oninput="syncRangeVisual(this, 'val-rad-sz', 'px')" />
+                </div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Opacity</span><span class="slider-val" id="val-rad-op">85%</span></div>
+                  <input type="range" class="wp-range" min="10" max="100" value="85" oninput="syncRangeVisual(this, 'val-rad-op', '%')" />
+                </div>
+                <div class="subsec-header"><span>⌄ What the radar draws</span><span class="subsec-count">5</span></div>
+                <div class="row-2col">
+                  <div class="ctrl-row"><span class="ctrl-label">Border</span><label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label></div>
+                  <div class="ctrl-row"><span class="ctrl-label">Range rings</span><label class="sw"><input type="checkbox" /><span class="sw-track"></span></label></div>
+                </div>
+                <div class="row-2col">
+                  <div class="ctrl-row"><span class="ctrl-label">Compass</span><label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label></div>
+                  <div class="ctrl-row"><span class="ctrl-label">Player names</span><label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">Watermark</div>
+                  <div class="card-subtitle">Segmented pill</div>
+                </div>
+                <label class="sw"><input type="checkbox" id="cfg-watermark" onchange="setConfigValue('watermark', this.checked)" /><span class="sw-track"></span></label>
+              </div>
+              <div class="card-body">
+                <div class="field-block">
+                  <span class="field-lbl">Position</span>
+                  <select class="wp-select"><option>Top left</option><option>Top right</option></select>
+                </div>
+                <div class="subsec-header"><span>⌄ Segments</span><span class="subsec-count">5</span></div>
+                <div class="row-2col">
+                  <div class="ctrl-row"><span class="ctrl-label">Logo</span><label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label></div>
+                  <div class="ctrl-row"><span class="ctrl-label">Time</span><label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label></div>
+                </div>
+                <div class="row-2col">
+                  <div class="ctrl-row"><span class="ctrl-label">FPS</span><label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label></div>
+                  <div class="ctrl-row"><span class="ctrl-label">CPU</span><label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label></div>
+                </div>
+              </div>
+            </article>
+
+            <div class="col-stack">
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">HUD lists</div>
+                    <div class="card-subtitle">Nearby players and active binds</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="ctrl-row">
+                    <div>
+                      <span class="ctrl-label">Spectator list</span>
+                      <span class="ctrl-sub">Players within the radius below</span>
+                    </div>
+                    <label class="sw"><input type="checkbox" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <div>
+                      <span class="ctrl-label">Bind list</span>
+                      <span class="ctrl-sub">Shows every active keybind and its mode</span>
+                    </div>
+                    <label class="sw"><input type="checkbox" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             6. ESP PREVIEW PAGE (Exact Frame 118s / 122s / 126s)
+             ================================================================ -->
+        <section class="page-view" id="page-esp_preview">
+          <div class="esp-preview-grid">
+            <div class="esp-stage-card">
+              <div class="esp-stage-topbar">
+                <span>Drag to rotate · Shift+drag to tilt · Scroll to zoom · right-click items for options</span>
+                <div class="esp-stage-actions">
+                  <button type="button" class="topbar-btn" onclick="toggleEspPreviewBox()">
+                    <input type="checkbox" id="esp-pv-box-chk" checked style="pointer-events:none;" />
+                    <span>Box</span>
+                  </button>
+                  <button type="button" class="topbar-btn" onclick="resetEspPreview()">↻ Reset positions</button>
+                </div>
+              </div>
+              <div class="esp-canvas-wrap">
+                <div id="esp-3d-viewport"></div>
+                <canvas id="esp-2d-overlay"></canvas>
+              </div>
+              <div class="esp-stage-footer">
+                <div>
+                  HP <b id="esp-lbl-hp" style="color:#fff;">Bottom</b> &nbsp;
+                  AR <b id="esp-lbl-ar" style="color:#fff;">Bottom</b> &nbsp;
+                  Text <b id="esp-lbl-txt" style="color:#fff;">Bottom center</b>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <button type="button" class="topbar-btn" style="height:22px;padding:0 7px;" onclick="zoomEspPreview(-15)">−</button>
+                  <span id="esp-zoom-readout" style="color:#fff;">100%</span>
+                  <button type="button" class="topbar-btn" style="height:22px;padding:0 7px;" onclick="zoomEspPreview(15)">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="esp-controls-scroll">
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Box</div>
+                    <div class="card-subtitle">Style, thickness and color</div>
+                  </div>
+                  <label class="sw">
+                    <input type="checkbox" id="esp-box-master" checked onchange="espPreviewState.box=this.checked;espPreviewDirty=true;" />
+                    <span class="sw-track"></span>
+                  </label>
+                </div>
+                <div class="card-body">
+                  <div class="field-block">
+                    <span class="field-lbl">Style</span>
+                    <select class="wp-select" onchange="espPreviewState.boxStyle=this.value;espPreviewDirty=true;">
+                      <option value="full">Full</option>
+                      <option value="corner">Corner</option>
+                    </select>
+                  </div>
+                  <div class="slider-block">
+                    <div class="slider-top"><span>Thickness</span><span class="slider-val" id="val-esp-thick">1.5</span></div>
+                    <input type="range" class="wp-range" min="0.5" max="4" step="0.5" value="1.5" oninput="espPreviewState.boxThick=parseFloat(this.value);syncRangeVisual(this,'val-esp-thick','');espPreviewDirty=true;" />
+                  </div>
+                  <div class="color-picker-group">
+                    <span class="field-lbl">Color</span>
+                    <div class="color-swatch-row">
+                      <div class="color-swatch-box" id="sw-box-col" style="background:#ffffff;">
+                        <input type="color" value="#ffffff" onchange="updateEspColor('boxColor', this.value, 'sw-box-col', 'hex-box-col')" />
+                      </div>
+                      <input type="text" class="color-hex-input" id="hex-box-col" value="#ffffff" onchange="updateEspColor('boxColor', this.value, 'sw-box-col', 'hex-box-col')" />
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Positions</div>
+                    <div class="card-subtitle">Anchors around the player box</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row-2col">
+                    <div class="field-block">
+                      <span class="field-lbl">Health bar</span>
+                      <select class="wp-select" onchange="espPreviewState.hpPos=this.value;espPreviewDirty=true;">
+                        <option value="bottom">Bottom</option>
+                        <option value="left">Left</option>
+                        <option value="top">Top</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                    <div class="field-block">
+                      <span class="field-lbl">Armor bar</span>
+                      <select class="wp-select" onchange="espPreviewState.arPos=this.value;espPreviewDirty=true;">
+                        <option value="bottom">Bottom</option>
+                        <option value="left">Left</option>
+                        <option value="top">Top</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Colors</div>
+                    <div class="card-subtitle">Same pickers as the item menus</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row-2col">
+                    <div class="color-picker-group">
+                      <span class="field-lbl">HP bar</span>
+                      <div class="color-swatch-row">
+                        <div class="color-swatch-box" id="sw-hp-col" style="background:#00ff63;">
+                          <input type="color" value="#00ff63" onchange="updateEspColor('hpColor', this.value, 'sw-hp-col', 'hex-hp-col')" />
+                        </div>
+                        <input type="text" class="color-hex-input" id="hex-hp-col" value="#00ff63" />
+                      </div>
+                    </div>
+                    <div class="color-picker-group">
+                      <span class="field-lbl">AR bar</span>
+                      <div class="color-swatch-row">
+                        <div class="color-swatch-box" id="sw-ar-col" style="background:#87cffa;">
+                          <input type="color" value="#87cffa" onchange="updateEspColor('arColor', this.value, 'sw-ar-col', 'hex-ar-col')" />
+                        </div>
+                        <input type="text" class="color-hex-input" id="hex-ar-col" value="#87cffa" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             7. PLAYERS PAGE (Exact Frame 142s)
+             ================================================================ -->
+        <section class="page-view" id="page-players">
+          <div class="list-page-card">
+            <div>
+              <div class="card-title">Players</div>
+              <div class="card-subtitle">Live list from the cheat cache</div>
+            </div>
+
+            <div class="online-banner">
+              <span>🛜</span>
+              <span id="players-online-banner">Cheat online — 1 player</span>
+            </div>
+
+            <div class="list-filter-bar">
+              <div class="list-search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="search" id="players-page-filter" placeholder="Filter by name" oninput="renderPlayersPage()" />
+              </div>
+              <select class="wp-select" style="width:130px;"><option>All players</option><option>Admins only</option></select>
+              <select class="wp-select" style="width:120px;"><option>Distance</option><option>Health</option></select>
+            </div>
+
+            <div id="players-page-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+            <button type="button" class="tp-waypoint-wide-btn" onclick="teleportToSelectedWaypoint()">
+              <span>◁ Teleport to waypoint</span>
+            </button>
+
+            <div style="font-size:11px;color:var(--text-muted);">
+              Row actions call the same code paths as the cheat overlay: teleport, copy outfit, friend / admin toggles and spectate.
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             8. VEHICLES PAGE (Exact Frame 144s)
+             ================================================================ -->
+        <section class="page-view" id="page-vehicles">
+          <div class="list-page-card">
+            <div>
+              <div class="card-title">Vehicles</div>
+              <div class="card-subtitle">Live vehicles reported by the cheat</div>
+            </div>
+
+            <div class="online-banner">
+              <span>🛜</span>
+              <span id="vehicles-online-banner">Cheat online — 0 vehicles</span>
+            </div>
+
+            <div class="list-filter-bar">
+              <div class="list-search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="search" id="vehicles-page-filter" placeholder="Filter by model or driver" oninput="renderVehiclesPage()" />
+              </div>
+              <select class="wp-select" style="width:130px;"><option>All vehicles</option></select>
+              <select class="wp-select" style="width:120px;"><option>Distance</option></select>
+            </div>
+
+            <div id="vehicles-page-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+            <div style="font-size:11px;color:var(--text-muted);">
+              Read-only view mirrored from the cheat's vehicle cache — refreshes ~2.5 times per second.
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             9. RESOURCES PAGE (Exact Frame 148s)
+             ================================================================ -->
+        <section class="page-view" id="page-resources">
+          <div class="list-page-card">
+            <div>
+              <div class="card-title">Resources</div>
+              <div class="card-subtitle">Server resources reported by the cheat</div>
+            </div>
+
+            <div class="online-banner">
+              <span>🛜</span>
+              <span>Cheat online — 12 started, 0 stopped</span>
+            </div>
+
+            <div class="list-filter-bar">
+              <div class="list-search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="search" id="resources-filter" placeholder="Filter by path" oninput="renderResourcesList()" />
+              </div>
+              <select class="wp-select" style="width:90px;"><option>All</option><option>Started</option></select>
+            </div>
+
+            <div id="resources-list-container" style="display:flex;flex-direction:column;"></div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             10. EXPLOITS PAGE (Exact Frame 152s: Player | Weapons | Vehicle | Combat mods)
+             ================================================================ -->
+        <section class="page-view" id="page-exploits">
+          <div class="grid-4col">
+            <!-- Col 1: Player -->
+            <article class="panel-card" data-searchable="god mode semi godmode anti headshot no ragdoll invisible infinite stamina shrink seatbelt noclip fast run">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">Player</div>
+                  <div class="card-subtitle">Persistent character states</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="ctrl-row"><span class="ctrl-label">God mode</span><label class="sw"><input type="checkbox" id="cfg-godmode" onchange="setConfigValue('godmode', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Anti headshot</span><label class="sw"><input type="checkbox" id="cfg-antihs" onchange="setConfigValue('antihs', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">No ragdoll</span><label class="sw"><input type="checkbox" id="cfg-noragdoll" onchange="setConfigValue('noragdoll', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Infinite stamina</span><label class="sw"><input type="checkbox" id="cfg-stamina" onchange="setConfigValue('stamina', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Infinite combat roll</span><label class="sw"><input type="checkbox" id="cfg-combatroll" onchange="setConfigValue('combatroll', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Shrink</span><label class="sw"><input type="checkbox" id="cfg-shrink" onchange="setConfigValue('shrink', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Seat belt</span><label class="sw"><input type="checkbox" id="cfg-seatbelt" onchange="setConfigValue('seatbelt', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">NoClip</span><label class="sw"><input type="checkbox" id="cfg-noclip" onchange="setConfigValue('noclip', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>NoClip speed</span><span class="slider-val" id="val-noclip_speed">2.0</span></div>
+                  <input type="range" class="wp-range" id="cfg-noclip_speed" min="0.1" max="20" step="0.1" value="2.0" oninput="syncRangeVisual(this, 'val-noclip_speed', '')" onchange="setConfigValue('noclip_speed', this.value)" />
+                </div>
+                <div class="ctrl-row"><span class="ctrl-label">Fast run</span><label class="sw"><input type="checkbox" id="cfg-fastrun" onchange="setConfigValue('fastrun', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Run speed</span><span class="slider-val" id="val-fastrun_speed">2.0</span></div>
+                  <input type="range" class="wp-range" id="cfg-fastrun_speed" min="0.1" max="10" step="0.1" value="2.0" oninput="syncRangeVisual(this, 'val-fastrun_speed', '')" onchange="setConfigValue('fastrun_speed', this.value)" />
+                </div>
+              </div>
+            </article>
+
+            <!-- Col 2: Weapons -->
+            <article class="panel-card" data-searchable="weapons no reload fill ammo no recoil no spread weapon wheel">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">Weapons</div>
+                  <div class="card-subtitle">Ammo, range and shot modifiers</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="ctrl-row"><span class="ctrl-label">No reload</span><label class="sw"><input type="checkbox" id="cfg-noreload" onchange="setConfigValue('noreload', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Infinite ammo</span><label class="sw"><input type="checkbox" id="cfg-ammo" onchange="setConfigValue('ammo', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">No recoil (global)</span><label class="sw"><input type="checkbox" id="cfg-norecoil" onchange="setConfigValue('norecoil', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">No spread (global)</span><label class="sw"><input type="checkbox" id="cfg-nospread" onchange="setConfigValue('nospread', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Force weapon wheel</span><label class="sw"><input type="checkbox" id="cfg-weaponwheel" onchange="setConfigValue('weaponwheel', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Custom range</span><span class="slider-val" id="val-wep-rng">150m</span></div>
+                  <input type="range" class="wp-range" min="10" max="500" value="150" oninput="syncRangeVisual(this, 'val-wep-rng', 'm')" />
+                </div>
+              </div>
+            </article>
+
+            <!-- Col 3: Vehicle -->
+            <article class="panel-card" data-searchable="vehicle god mode steal car boost gravity">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">Vehicle</div>
+                  <div class="card-subtitle">Persistent vehicle states</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="ctrl-row"><span class="ctrl-label">Vehicle god mode</span><label class="sw"><input type="checkbox" id="cfg-veh_godmode" onchange="setConfigValue('veh_godmode', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Steal car</span><label class="sw"><input type="checkbox" id="cfg-stealcar" onchange="setConfigValue('stealcar', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Rocket boost</span><label class="sw"><input type="checkbox" /><span class="sw-track"></span></label></div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Boost speed</span><span class="slider-val" id="val-veh-bst">50m/s</span></div>
+                  <input type="range" class="wp-range" min="10" max="200" value="50" oninput="syncRangeVisual(this, 'val-veh-bst', 'm/s')" />
+                </div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Vehicle gravity</span><span class="slider-val" id="val-veh-grv">1.0x</span></div>
+                  <input type="range" class="wp-range" min="0.1" max="5.0" step="0.1" value="1.0" oninput="syncRangeVisual(this, 'val-veh-grv', 'x')" />
+                </div>
+              </div>
+            </article>
+
+            <!-- Col 4: Combat mods & Auto Peek -->
+            <article class="panel-card" data-searchable="combat mods autopeek spinbot fake lag">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">Combat mods</div>
+                  <div class="card-subtitle">Auto peek and rotation tricks</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="ctrl-row"><span class="ctrl-label">Auto Peek</span><label class="sw"><input type="checkbox" id="cfg-autopeek" onchange="setConfigValue('autopeek', this.checked)" /><span class="sw-track"></span></label></div>
+                <div class="ctrl-row"><span class="ctrl-label">Spinbot</span><label class="sw"><input type="checkbox" /><span class="sw-track"></span></label></div>
+                <div class="slider-block">
+                  <div class="slider-top"><span>Rotation speed</span><span class="slider-val" id="val-spin-spd">1000°/s</span></div>
+                  <input type="range" class="wp-range" min="100" max="3600" value="1000" oninput="syncRangeVisual(this, 'val-spin-spd', '°/s')" />
+                </div>
+                <div class="ctrl-row"><span class="ctrl-label">Fake lag</span><label class="sw"><input type="checkbox" /><span class="sw-track"></span></label></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             11. SETTINGS PAGE (Exact Frame 160s: Safe mode | Overlay | Session)
+             ================================================================ -->
+        <section class="page-view" id="page-settings">
+          <div class="grid-2col" style="max-width:920px;">
+            <article class="panel-card">
+              <div class="card-head">
+                <div>
+                  <div class="card-title">Safe mode</div>
+                  <div class="card-subtitle">Full-fat mode (all features)</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="padding:12px;border-radius:8px;background:#0f0f0f;border:1px solid #1f1f1f;display:flex;flex-direction:column;gap:8px;">
+                  <div><span class="rage-badge">RAGE</span></div>
+                  <div style="font-size:11.5px;color:var(--text-secondary);">Everything is available. Turn on before running on servers with detection.</div>
+                  <div class="ctrl-row" style="border:none;">
+                    <div>
+                      <div class="ctrl-label" style="font-weight:700;">SAFEMODE off</div>
+                      <span class="ctrl-sub">Click to lock detectable features</span>
+                    </div>
+                    <label class="sw"><input type="checkbox" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+
+                <div class="subsec-header"><span>BLOCKED WHILE ON</span></div>
+                <ul style="padding-left:16px;font-size:11.5px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px;">
+                  <li>Noclip, godmode, invisible, no-ragdoll</li>
+                  <li>Weapon mods (magic bullet, ammo, size, range)</li>
+                  <li>Vehicle god / boost / super jump / rocket</li>
+                  <li>Spinbot, anti-cheater writes, solo session</li>
+                </ul>
+
+                <div class="subsec-header"><span>LEFT AVAILABLE</span></div>
+                <ul style="padding-left:16px;font-size:11.5px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px;">
+                  <li>All ESP, radar and cosmetics</li>
+                  <li>Aim core (FOV, bones) with bypass forced on</li>
+                  <li>Silent aim + trigger (server-safe path)</li>
+                  <li>Teleport to waypoint / player, copy outfit</li>
+                </ul>
+              </div>
+            </article>
+
+            <div class="col-stack">
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Overlay</div>
+                    <div class="card-subtitle">Panel and recording behavior</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="ctrl-row">
+                    <div><span class="ctrl-label">VSync</span><span class="ctrl-sub">Present with vertical sync</span></div>
+                    <label class="sw"><input type="checkbox" checked /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <div><span class="ctrl-label">Stream proof</span><span class="ctrl-sub">Hide from capture software</span></div>
+                    <label class="sw"><input type="checkbox" id="cfg-streamproof" onchange="setConfigValue('streamproof', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                  <div class="ctrl-row">
+                    <div><span class="ctrl-label">Cloud Sync</span><span class="ctrl-sub">Push telemetry to Render / Cloudflare</span></div>
+                    <label class="sw"><input type="checkbox" id="cfg-web_cloudsync" onchange="setConfigValue('web_cloudsync', this.checked)" /><span class="sw-track"></span></label>
+                  </div>
+                </div>
+              </article>
+
+              <article class="panel-card">
+                <div class="card-head">
+                  <div>
+                    <div class="card-title">Session</div>
+                    <div class="card-subtitle">Destructive actions</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <button type="button" class="btn-danger-outline" onclick="showPanelToast('Unload signal dispatched', 'Sent to local p4m.exe')">⏻ Unload cheat</button>
+                  <button type="button" class="btn-danger-outline" onclick="fetchConfig();showPanelToast('Config reset', 'Restored default configuration')">↻ Reset config to defaults</button>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             12. CONFIGS PAGE (Exact Frame 162s) & DASHBOARD PAGE
+             ================================================================ -->
+        <section class="page-view" id="page-configs">
+          <div style="max-width:1100px;display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;">COMMUNITY</div>
+                <div style="font-size:20px;font-weight:800;color:#fff;">Configs</div>
+                <div style="font-size:12px;color:var(--text-muted);">Configs shared by other players. Copy a code and import it from the Presets menu.</div>
+              </div>
+              <button type="button" class="white-cta-btn" onclick="exportWebConfig()">+ Create config</button>
+            </div>
+
+            <div class="list-filter-bar">
+              <div class="list-search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="search" placeholder="Search configs" />
+              </div>
+              <select class="wp-select" style="width:140px;"><option>Most popular</option></select>
+              <select class="wp-select" style="width:140px;"><option>All products</option></select>
+            </div>
+
+            <div class="panel-card" style="padding:48px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div style="font-size:13px;font-weight:700;color:#fff;">No configs published yet</div>
+              <div style="font-size:12px;color:var(--text-muted);">Be the first — publish one and it shows up here.</div>
+              <button type="button" class="white-cta-btn" onclick="exportWebConfig()">+ Create config</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="page-view" id="page-dashboard">
+          <div class="grid-3col">
+            <article class="panel-card">
+              <div class="card-head"><div><div class="card-title">Live Radar</div><div class="card-subtitle">Authentic GTA V session map</div></div></div>
+              <div class="card-body">
+                <div style="font-size:12px;color:var(--text-secondary);">Real-time Rockstar GTA V multi-zoom cartography with player tracking and instant teleport dispatch.</div>
+                <button type="button" class="white-cta-btn" onclick="switchPage('radar')">Open Radar</button>
+              </div>
+            </article>
+            <article class="panel-card">
+              <div class="card-head"><div><div class="card-title">Legitbot &amp; Silent</div><div class="card-subtitle">Combat configuration</div></div></div>
+              <div class="card-body">
+                <div style="font-size:12px;color:var(--text-secondary);">Configure FOV, smoothing, bone selection, hit chance and FiveGuard bypass rules.</div>
+                <button type="button" class="white-cta-btn" onclick="switchPage('legitbot')">Configure Combat</button>
+              </div>
+            </article>
+            <article class="panel-card">
+              <div class="card-head"><div><div class="card-title">3D ESP Preview</div><div class="card-subtitle">Interactive overlay studio</div></div></div>
+              <div class="card-body">
+                <div style="font-size:12px;color:var(--text-secondary);">Preview box, skeleton, health/armor bars and colors on an interactive 3D ped model.</div>
+                <button type="button" class="white-cta-btn" onclick="switchPage('esp_preview')">Open 3D Preview</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      </main>
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- MAIN WORKSPACE                                                        -->
-  <!-- ===================================================================== -->
-  <main class="workspace">
+  <!-- Bottom-Right Toast Notification (Exact Frame 80s: Panel connected) -->
+  <div class="panel-toast" id="panel-toast">
+    <div class="toast-check">✓</div>
+    <div>
+      <div class="toast-title" id="toast-title">Panel connected</div>
+      <div class="toast-sub" id="toast-sub">WebSocket link established</div>
+    </div>
+  </div>
 
-    <!-- =================================================================== -->
-    <!-- VIEW 1: AUTHENTIC GTA V WORLD MAP & INSPECTOR                       -->
-    <!-- =================================================================== -->
-    <section id="tab-map" class="view-panel active" aria-label="Interactive GTA V Map">
-      <div class="map-workspace">
-
-        <!-- Authentic GTA V Leaflet Map Container -->
-        <div class="map-stage" id="map-viewport">
-          <div id="gta-leaflet-map" class="gta-leaflet-container" role="application" aria-label="Authentic Grand Theft Auto V World Map"></div>
-
-          <!-- Top-Left Map Style & Layer Bar -->
-          <div class="map-toolbar top-left">
-            <div class="segmented-control" role="group" aria-label="GTA V Map Cartography Style">
-              <button type="button" class="seg-btn active" id="style-btn-atlas" onclick="setMapStyle('atlas')">
-                Atlas
-              </button>
-              <button type="button" class="seg-btn" id="style-btn-satellite" onclick="setMapStyle('satellite')">
-                Satellite
-              </button>
-              <button type="button" class="seg-btn" id="style-btn-grid" onclick="setMapStyle('grid')">
-                Topo Grid
-              </button>
-            </div>
-
-            <div class="layer-bar" role="group" aria-label="Map Overlay Layers">
-              <button type="button" class="layer-pill active" id="chip-pois" onclick="toggleLayer('pois')" title="Toggle Verified GTA V Landmarks">
-                <span class="dot-indicator poi"></span>
-                <span>Landmarks</span>
-                <b id="cnt-pois">24</b>
-              </button>
-              <button type="button" class="layer-pill active" id="chip-admins" onclick="toggleLayer('admins')" title="Toggle Flagged Watchlist Players">
-                <span class="dot-indicator admin"></span>
-                <span>Watchlist</span>
-                <b id="cnt-admins">0</b>
-              </button>
-              <button type="button" class="layer-pill active" id="chip-players" onclick="toggleLayer('players')" title="Toggle Session Players">
-                <span class="dot-indicator player"></span>
-                <span>Players</span>
-                <b id="cnt-players">0</b>
-              </button>
-              <button type="button" class="layer-pill active" id="chip-vehicles" onclick="toggleLayer('vehicles')" title="Toggle Session Vehicles">
-                <span class="dot-indicator vehicle"></span>
-                <span>Vehicles</span>
-                <b id="cnt-vehicles">0</b>
-              </button>
-              <button type="button" class="layer-pill active" id="chip-blips" onclick="toggleLayer('blips')" title="Toggle Native Game Blips">
-                <span class="dot-indicator blip"></span>
-                <span>Game Blips</span>
-                <b id="cnt-blips">0</b>
-              </button>
-            </div>
-          </div>
-
-          <!-- Bottom-Left Camera & Navigation Controls -->
-          <div class="map-toolbar bottom-left">
-            <div class="control-cluster">
-              <button type="button" class="ctrl-btn" onclick="zoomMapIn()" aria-label="Zoom in" title="Zoom in (+)">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              </button>
-              <button type="button" class="ctrl-btn" onclick="zoomMapOut()" aria-label="Zoom out" title="Zoom out (-)">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              </button>
-              <button type="button" class="ctrl-btn" onclick="recenterOnLocal()" aria-label="Center on local player" title="Center on local player">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
-              </button>
-              <button type="button" class="ctrl-btn" onclick="resetFullView()" aria-label="Reset full San Andreas view" title="Reset full San Andreas view">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-              </button>
-              <button type="button" class="ctrl-btn text-btn" id="chip-follow" onclick="toggleFollowLocal()" title="Lock camera to local player">
-                <span>Follow:</span>
-                <b id="lbl-follow">OFF</b>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Inspector Sidebar -->
-        <aside class="inspector-sidebar" id="inspector-sidebar" aria-label="Telemetry and Location Inspector">
-
-          <!-- Block 1: Local Player Telemetry & Waypoint Dispatch -->
-          <div class="inspector-section">
-            <div class="section-header">
-              <h2 class="section-title">Telemetry Readout</h2>
-              <span class="region-badge" id="hud-zone">San Andreas</span>
-            </div>
-
-            <div class="telemetry-grid">
-              <div class="metric-cell">
-                <span class="metric-label">POS X</span>
-                <span class="metric-val" id="hud-x">—</span>
-              </div>
-              <div class="metric-cell">
-                <span class="metric-label">POS Y</span>
-                <span class="metric-val" id="hud-y">—</span>
-              </div>
-              <div class="metric-cell">
-                <span class="metric-label">POS Z</span>
-                <span class="metric-val" id="hud-z">—</span>
-              </div>
-            </div>
-
-            <div class="vitals-grid">
-              <div class="vital-item">
-                <div class="vital-top">
-                  <span class="vital-label">HEALTH</span>
-                  <span class="vital-num" id="hud-hp">—</span>
-                </div>
-                <div class="meter-track"><div id="bar-hp" class="meter-fill hp" style="width: 0%;"></div></div>
-              </div>
-              <div class="vital-item">
-                <div class="vital-top">
-                  <span class="vital-label">ARMOR</span>
-                  <span class="vital-num" id="hud-arm">—</span>
-                </div>
-                <div class="meter-track"><div id="bar-arm" class="meter-fill arm" style="width: 0%;"></div></div>
-              </div>
-            </div>
-
-            <!-- Selected Map Waypoint Card -->
-            <div class="waypoint-box" id="waypoint-card" style="display: none;">
-              <div class="waypoint-header">
-                <span class="waypoint-title" id="wp-label">SELECTED WAYPOINT</span>
-                <button type="button" class="btn-close" onclick="clearWaypoint()" aria-label="Clear waypoint">✕</button>
-              </div>
-              <div class="waypoint-coords" id="wp-coords">X: 0.0, Y: 0.0, Z: 35.0</div>
-              <div class="waypoint-actions">
-                <button type="button" class="btn-primary btn-full" onclick="teleportToSelectedWaypoint()">
-                  Dispatch Teleport
-                </button>
-                <button type="button" class="btn-secondary" onclick="copyWaypointCoords()" title="Copy coordinates">
-                  Copy
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Block 2: Verified GTA V Locations Directory (Searchable) -->
-          <div class="inspector-section">
-            <div class="section-header">
-              <h2 class="section-title">GTA V Locations</h2>
-              <span class="section-meta" id="poi-count-label">24 verified</span>
-            </div>
-
-            <div class="search-field">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <input type="search" id="poi-search" placeholder="Filter Los Santos &amp; Blaine County..." oninput="renderLandmarkDirectory()" aria-label="Filter GTA V locations" />
-            </div>
-
-            <div class="landmark-list" id="landmark-directory" role="list"></div>
-          </div>
-
-          <!-- Block 3: Quick Overlay Controls -->
-          <div class="inspector-section">
-            <div class="section-header">
-              <h2 class="section-title">Quick Directives</h2>
-              <span class="section-meta">Live Sync</span>
-            </div>
-            <div class="switch-group">
-              <label class="switch-row">
-                <span class="switch-text">Watchlist Admin Highlight</span>
-                <input type="checkbox" id="quick-esp_admin" onchange="setConfigValue('esp_admin', this.checked)" checked />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Dynamic Spectrum Cycle</span>
-                <input type="checkbox" id="quick-esp_admin_rainbow" onchange="setConfigValue('esp_admin_rainbow', this.checked)" checked />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Bounding Box Overlay</span>
-                <input type="checkbox" id="quick-esp_box" onchange="setConfigValue('esp_box', this.checked)" checked />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Skeletal Joint Rig</span>
-                <input type="checkbox" id="quick-esp_skeleton" onchange="setConfigValue('esp_skeleton', this.checked)" checked />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Vehicle Telemetry Overlay</span>
-                <input type="checkbox" id="quick-vehesp_enabled" onchange="setConfigValue('vehesp_enabled', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Local Invulnerability</span>
-                <input type="checkbox" id="quick-godmode" onchange="setConfigValue('godmode', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Block 4: Live Session Proximity Feed -->
-          <div class="inspector-section grow">
-            <div class="section-header">
-              <h2 class="section-title">Session Proximity</h2>
-              <span class="section-meta" id="hud-admins">0 flagged</span>
-            </div>
-            <div class="proximity-list" id="proximity-list"></div>
-          </div>
-
-        </aside>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- VIEW 2: RUNTIME PARAMETERS & CONFIGURATION                          -->
-    <!-- =================================================================== -->
-    <section id="tab-config" class="view-panel" aria-label="Runtime Parameters">
-      <div class="page-scroll">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Runtime Parameters</h1>
-            <p class="page-subtitle">Changes synchronize immediately with the local C++ process (<code>127.0.0.1:8080</code>) or queue for Render Cloud Sync (<code>/api/sync</code>).</p>
-          </div>
-        </div>
-
-        <div class="settings-grid">
-          <!-- Column 1: Visual Telemetry -->
-          <div class="settings-card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">Visual Overlay Pipeline</h2>
-                <p class="card-desc">Entity bounding geometry, skeletal joints, and watchlist indicators.</p>
-              </div>
-              <span class="tag-pill">ESP</span>
-            </div>
-
-            <div class="switch-group">
-              <label class="switch-row">
-                <span class="switch-text">Master Visual Pipeline</span>
-                <input type="checkbox" id="cfg-esp_enabled" onchange="setConfigValue('esp_enabled', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Watchlist Admin Highlight (&ldquo;Admin&rdquo; Tag)</span>
-                <input type="checkbox" id="cfg-esp_admin" onchange="setConfigValue('esp_admin', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Admin Spectrum Cycle</span>
-                <input type="checkbox" id="cfg-esp_admin_rainbow" onchange="setConfigValue('esp_admin_rainbow', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">2D Bounding Box</span>
-                <input type="checkbox" id="cfg-esp_box" onchange="setConfigValue('esp_box', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Bone Skeleton Rig</span>
-                <input type="checkbox" id="cfg-esp_skeleton" onchange="setConfigValue('esp_skeleton', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Origin Snaplines</span>
-                <input type="checkbox" id="cfg-esp_snaplines" onchange="setConfigValue('esp_snaplines', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Network Identifiers (Usernames)</span>
-                <input type="checkbox" id="cfg-esp_names" onchange="setConfigValue('esp_names', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Equipped Weapon Readout</span>
-                <input type="checkbox" id="cfg-esp_weapon" onchange="setConfigValue('esp_weapon', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Cranial Target Indicator</span>
-                <input type="checkbox" id="cfg-esp_headcircle" onchange="setConfigValue('esp_headcircle', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Health &amp; Armor Gauges</span>
-                <input type="checkbox" id="cfg-esp_health" onchange="setConfigValue('esp_health', this.checked); setConfigValue('esp_armor', this.checked);" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Distance Readout</span>
-                <input type="checkbox" id="cfg-esp_distance" onchange="setConfigValue('esp_distance', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Filter Ambient Pedestrians (NPCs)</span>
-                <input type="checkbox" id="cfg-esp_ignore_npcs" onchange="setConfigValue('esp_ignore_npcs', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Filter Incapacitated Entities</span>
-                <input type="checkbox" id="cfg-esp_ignore_dead" onchange="setConfigValue('esp_ignore_dead', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Vehicle Telemetry Overlay</span>
-                <input type="checkbox" id="cfg-vehesp_enabled" onchange="setConfigValue('vehesp_enabled', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-            </div>
-
-            <div class="range-control">
-              <div class="range-header">
-                <label for="cfg-esp_max_distance">Render Cull Distance</label>
-                <span class="range-val" id="val-esp_max_distance">250m</span>
-              </div>
-              <input type="range" min="50" max="1500" value="250" id="cfg-esp_max_distance"
-                oninput="document.getElementById('val-esp_max_distance').innerText = this.value + 'm'"
-                onchange="setConfigValue('esp_max_distance', this.value)" />
-            </div>
-          </div>
-
-          <!-- Column 2: Vector Solver & Targeting -->
-          <div class="settings-card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">Targeting &amp; Vector Solver</h2>
-                <p class="card-desc">View angle interpolation, field-of-view bounds, and trigger automation.</p>
-              </div>
-              <span class="tag-pill">VECTOR</span>
-            </div>
-
-            <div class="switch-group">
-              <label class="switch-row">
-                <span class="switch-text">Enable View Angle Aimbot</span>
-                <input type="checkbox" id="cfg-aimbot_enabled" onchange="setConfigValue('aimbot_enabled', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Line-of-Sight Visibility Check</span>
-                <input type="checkbox" id="cfg-aimbot_visible" onchange="setConfigValue('aimbot_visible', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Enable Silent Vector Redirection</span>
-                <input type="checkbox" id="cfg-silentaim_enabled" onchange="setConfigValue('silentaim_enabled', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Enable Automated TriggerBot</span>
-                <input type="checkbox" id="cfg-triggerbot_enabled" onchange="setConfigValue('triggerbot_enabled', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-            </div>
-
-            <div class="range-control">
-              <div class="range-header">
-                <label for="cfg-aimbot_fov">Aimbot Angular Radius (FOV)</label>
-                <span class="range-val" id="val-aimbot_fov">180°</span>
-              </div>
-              <input type="range" min="10" max="360" value="180" id="cfg-aimbot_fov"
-                oninput="document.getElementById('val-aimbot_fov').innerText = this.value + '°'"
-                onchange="setConfigValue('aimbot_fov', this.value)" />
-            </div>
-
-            <div class="range-control">
-              <div class="range-header">
-                <label for="cfg-aimbot_speed">Interpolation Smoothing Factor</label>
-                <span class="range-val" id="val-aimbot_speed">12</span>
-              </div>
-              <input type="range" min="1" max="50" value="12" id="cfg-aimbot_speed"
-                oninput="document.getElementById('val-aimbot_speed').innerText = this.value"
-                onchange="setConfigValue('aimbot_speed', this.value)" />
-            </div>
-
-            <div class="range-control">
-              <div class="range-header">
-                <label for="cfg-silentaim_fov">Silent Vector FOV</label>
-                <span class="range-val" id="val-silentaim_fov">40°</span>
-              </div>
-              <input type="range" min="5" max="180" value="40" id="cfg-silentaim_fov"
-                oninput="document.getElementById('val-silentaim_fov').innerText = this.value + '°'"
-                onchange="setConfigValue('silentaim_fov', this.value)" />
-            </div>
-          </div>
-
-          <!-- Column 3: Local Entity & Ballistics -->
-          <div class="settings-card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">Local Entity &amp; Ballistics</h2>
-                <p class="card-desc">Kinematics overrides, movement multipliers, and weapon stability.</p>
-              </div>
-              <span class="tag-pill">LOCAL</span>
-            </div>
-
-            <div class="switch-group">
-              <label class="switch-row">
-                <span class="switch-text">Invulnerability (GodMode)</span>
-                <input type="checkbox" id="cfg-godmode" onchange="setConfigValue('godmode', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Free-Camera Kinematics (NoClip)</span>
-                <input type="checkbox" id="cfg-noclip" onchange="setConfigValue('noclip', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Enhanced Sprint Velocity</span>
-                <input type="checkbox" id="cfg-fastrun" onchange="setConfigValue('fastrun', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Unlimited Stamina Pool</span>
-                <input type="checkbox" id="cfg-stamina" onchange="setConfigValue('stamina', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Unlimited Ammunition</span>
-                <input type="checkbox" id="cfg-ammo" onchange="setConfigValue('ammo', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Zero Recoil Impulse</span>
-                <input type="checkbox" id="cfg-norecoil" onchange="setConfigValue('norecoil', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-              <label class="switch-row">
-                <span class="switch-text">Zero Ballistic Spread</span>
-                <input type="checkbox" id="cfg-nospread" onchange="setConfigValue('nospread', this.checked)" />
-                <span class="switch-ui"></span>
-              </label>
-            </div>
-
-            <div class="range-control">
-              <div class="range-header">
-                <label for="cfg-noclip_speed">NoClip Translation Speed</label>
-                <span class="range-val" id="val-noclip_speed">2.0</span>
-              </div>
-              <input type="range" min="1" max="20" step="0.5" value="2.0" id="cfg-noclip_speed"
-                oninput="document.getElementById('val-noclip_speed').innerText = this.value"
-                onchange="setConfigValue('noclip_speed', this.value)" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- VIEW 3: WATCHLIST & STAFF DETECTION                                 -->
-    <!-- =================================================================== -->
-    <section id="tab-admins" class="view-panel" aria-label="Watchlist and Staff Detection">
-      <div class="page-scroll">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Watchlist &amp; Staff Detection</h1>
-            <p class="page-subtitle">Entities matching watchlist identifiers or elevated invulnerability heuristics are flagged across the in-game overlay and GTA V map.</p>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Identifier Matching Rules</h2>
-              <p class="card-desc">Add a substring or exact player handle to flag as an administrator in real time.</p>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <input type="text" id="admin-input" class="text-input" placeholder="Enter username or tag (e.g. txadmin, staff, mod)..." aria-label="Admin identifier" onkeydown="if(event.key==='Enter') addAdminWatch()" />
-            <button type="button" class="btn-primary" onclick="addAdminWatch()">Add Identifier</button>
-          </div>
-
-          <div class="chip-collection" id="watchlist-chips" aria-label="Active watchlist patterns"></div>
-        </div>
-
-        <div class="settings-card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Flagged Session Entities</h2>
-              <p class="card-desc">Live telemetry for watchlist matches detected in the current FiveM session.</p>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Classification</th>
-                  <th>Identifier</th>
-                  <th>Net ID</th>
-                  <th>World Coordinates (X, Y, Z)</th>
-                  <th>Distance</th>
-                  <th>Vitals</th>
-                  <th>Equipped</th>
-                  <th class="text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="admins-table-body">
-                <tr><td colspan="8" class="empty-cell">No flagged entities detected in the current session.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- VIEW 4: SESSION ENTITIES & TELEPORT DIRECTORY                       -->
-    <!-- =================================================================== -->
-    <section id="tab-entities" class="view-panel" aria-label="Session Entities Directory">
-      <div class="page-scroll">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Session Entities Directory</h1>
-            <p class="page-subtitle">Real-time player roster streamed from the attached FiveM process. Fake or simulated players are never generated.</p>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Role</th>
-                  <th>Player Identifier</th>
-                  <th>Net ID</th>
-                  <th>World Coordinates</th>
-                  <th>Distance</th>
-                  <th>Health</th>
-                  <th>Armor</th>
-                  <th>Weapon</th>
-                  <th class="text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="entities-table-body">
-                <tr><td colspan="9" class="empty-cell">No live process attached. Start p4m.exe or enable Render Cloud Sync to stream session entities.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <script src="/static/vendor/leaflet.js"></script>
-  <script src="/static/app.js"></script>
+  <script src="/static/vendor/leaflet.js?v=gozio_v1"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="/static/app.js?v=gozio_v1"></script>
 </body>
 </html>
