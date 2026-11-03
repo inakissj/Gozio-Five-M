@@ -114,7 +114,11 @@ function switchPage(pageId) {
   if (pageId === 'radar' && gtaMap) {
     requestAnimationFrame(() => {
       gtaMap.invalidateSize();
-      setTimeout(() => gtaMap.invalidateSize(), 60);
+      if (typeof refitActiveMap === 'function') refitActiveMap();
+      setTimeout(() => {
+        gtaMap.invalidateSize();
+        if (typeof refitActiveMap === 'function') refitActiveMap();
+      }, 150);
     });
   } else if (pageId === 'esp_preview') {
     setTimeout(() => initEspPreview3D(), 50);
@@ -265,7 +269,7 @@ function createGtaCRS() {
       return Math.hypot(pos2.lng - pos1.lng, pos2.lat - pos1.lat);
     },
     transformation: new L.Transformation(scaleX, centerX, -scaleY, centerY),
-    infinite: false,
+    infinite: true,
   });
 }
 
@@ -300,8 +304,6 @@ function initGtaMap() {
     minNativeZoom: 0,
     maxNativeZoom: 4,
     tileSize: 256,
-    noWrap: true,
-    bounds: gtaTileBounds,
     keepBuffer: 6,
     updateWhenIdle: false,
     updateWhenZooming: true,
@@ -328,18 +330,14 @@ function initGtaMap() {
     crs,
     minZoom: 1,
     maxZoom: 7,
-    zoom: 3,
+    zoom: 2,
     zoomSnap: 0.25,
     zoomDelta: 0.5,
     wheelPxPerZoomLevel: 80,
-    center: [1200, 150],
+    center: [2185, 515],
     layers: [tileLayers.atlas],
     zoomControl: false,
     attributionControl: false,
-    preferCanvas: true,
-    maxBounds: gtaTileBounds,
-    maxBoundsViscosity: 1.0,
-    bounceAtZoomLimits: false,
   });
 
   layerGroups = {
@@ -365,14 +363,27 @@ function initGtaMap() {
     setSelectedWaypoint(wx, wy, 35.0, 'Map Waypoint');
   });
 
+  // Actual GTA V playable landmass bounds (south-west to north-east in world units).
+  // Covers Los Santos + Blaine County; excludes the mostly empty ocean east/south.
+  const gtaContentBounds = L.latLngBounds(
+    L.latLng(-3200, -3800),  // SW corner (south of Los Santos)
+    L.latLng(7700, 4000)      // NE corner (far north of Blaine County)
+  );
+
   const refitMapToViewport = () => {
     if (!gtaMap) return;
     gtaMap.invalidateSize();
-    gtaMap.fitBounds(gtaTileBounds, { padding: [0, 0], animate: false });
+    const sz = gtaMap.getSize();
+    if (sz.x < 50 || sz.y < 50) return;
+    gtaMap.fitBounds(gtaContentBounds, { padding: [8, 8], animate: false });
   };
+
+  // Expose a global refit so switchPage can call it (and so are user actions)
+  window.refitActiveMap = refitMapToViewport;
 
   requestAnimationFrame(refitMapToViewport);
   setTimeout(refitMapToViewport, 300);
+  setTimeout(refitMapToViewport, 800);
 
   // Keep the map fitted on viewport resize
   let resizeTimer = null;
@@ -384,7 +395,10 @@ function initGtaMap() {
   // Also refit when the Radar page becomes visible after being hidden
   if (window.ResizeObserver) {
     try {
-      const ro = new ResizeObserver(() => {
+      const ro = new ResizeObserver(entries => {
+        for (const e of entries) {
+          if (e.contentRect.width < 50 || e.contentRect.height < 50) return;
+        }
         if (resizeTimer) clearTimeout(resizeTimer);
         resizeTimer = setTimeout(refitMapToViewport, 100);
       });
