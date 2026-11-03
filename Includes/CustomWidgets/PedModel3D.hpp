@@ -88,8 +88,7 @@ namespace Custom
 				int r = (int)(((baseCol >> 0) & 0xFF) * light);
 				int g = (int)(((baseCol >> 8) & 0xFF) * light);
 				int b = (int)(((baseCol >> 16) & 0xFF) * light);
-				int a = (baseCol >> 24) & 0xFF;
-				ImU32 litCol = IM_COL32(r, g, b, a);
+				int a = (int)((float)((baseCol >> 24) & 0xFF) * guiAlpha); if (a <= 0) continue; ImU32 litCol = IM_COL32(r, g, b, a);
 
 				sorted.push_back({ pa, pb, pc, avgZ, litCol });
 			}
