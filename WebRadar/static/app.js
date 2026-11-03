@@ -326,9 +326,9 @@ function initGtaMap() {
 
   gtaMap = L.map(container, {
     crs,
-    minZoom: 2,
+    minZoom: 3,
     maxZoom: 7,
-    zoom: 2.5,
+    zoom: 3,
     zoomSnap: 0.25,
     zoomDelta: 0.5,
     wheelPxPerZoomLevel: 80,
@@ -366,6 +366,13 @@ function initGtaMap() {
   });
 
   requestAnimationFrame(() => {
+    gtaMap.invalidateSize();
+    gtaMap.fitBounds(gtaTileBounds, { padding: [0, 0], animate: false });
+  });
+
+  // Keep the map fitted on viewport resize
+  window.addEventListener('resize', () => {
+    if (!gtaMap) return;
     gtaMap.invalidateSize();
   });
 }
