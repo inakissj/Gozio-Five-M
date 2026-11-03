@@ -1,5 +1,6 @@
 #pragma once
 #include <Includes/Includes.hpp>
+#include <Includes/CustomWidgets/PedModel3D.hpp>
 
 namespace Custom
 {
@@ -68,6 +69,13 @@ namespace Custom
 				{ImVec2( iBox_X, iBox_Y + iBox_Height + 3.5f )}, // Bottom
 				{ImVec2( iBox_X - 3.5f, iBox_Y )}, // Left
 			};
+
+			Custom::g_PedModel.HandleInput(ImGui::GetWindowPos(), ImGui::GetWindowSize());
+			{
+				float pedScale = iBox_Height * 0.62f;
+				ImVec2 pedCenter(iBox_X + iBox_Width / 2.f, iBox_Y + iBox_Height * 0.48f);
+				Custom::g_PedModel.Draw(ImGui::GetWindowDrawList(), pedCenter, pedScale);
+			}
 
 			static float BoxAnimation = 0.f;
 			BoxAnimation = ImClamp( BoxAnimation + ( 6 * ImGui::GetIO( ).DeltaTime * ( g_Config.ESP->Box ? 1.f : -1.f ) ), 0.f, g_Config.ESP->BoxCol.Value.w );
