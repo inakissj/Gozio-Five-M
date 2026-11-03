@@ -243,19 +243,30 @@ namespace Custom
 		{
 			ImU32 skin = IM_COL32(212, 165, 116, 255);
 			ImU32 skinD = IM_COL32(196, 148, 100, 255);
-			ImU32 shirt = IM_COL32(42, 42, 42, 255);
-			ImU32 pants = IM_COL32(30, 48, 80, 255);
-			ImU32 pantsD = IM_COL32(22, 36, 64, 255);
-			ImU32 hair = IM_COL32(26, 16, 8, 255);
-			ImU32 shoe = IM_COL32(26, 26, 26, 255);
-			ImU32 sole = IM_COL32(51, 51, 51, 255);
-			ImU32 belt = IM_COL32(42, 32, 21, 255);
-			ImU32 buckle = IM_COL32(136, 128, 112, 255);
+			ImU32 shirt = IM_COL32(31, 68, 157, 255);
+			ImU32 pants = IM_COL32(178, 29, 29, 255);
+			ImU32 pantsD = IM_COL32(31, 68, 157, 255);
+			ImU32 hair = IM_COL32(16, 10, 10, 255);
+			ImU32 shoe = IM_COL32(178, 29, 29, 255);
+			ImU32 sole = IM_COL32(120, 20, 20, 255);
+			ImU32 belt = IM_COL32(233, 194, 52, 255);
+			ImU32 buckle = IM_COL32(233, 194, 52, 255);
+			ImU32 cape = IM_COL32(178, 29, 29, 255);
+			ImU32 shield = IM_COL32(233, 194, 52, 255);
 			ImU32 eyeW = IM_COL32(248, 248, 248, 255);
 			ImU32 eyeI = IM_COL32(58, 37, 16, 255);
 			ImU32 lip = IM_COL32(184, 112, 96, 255);
 
 			int S = 8;
+
+			// Cape (red flowing behind body)
+			AddBox(0.28f, 0.8f, 0.02f, 0, 0.25f, -0.14f, cape);
+			AddBox(0.22f, 0.15f, 0.02f, 0, 0.62f, -0.13f, cape);
+			AddBox(0.24f, 0.1f, 0.02f, 0, -0.18f, -0.145f, cape);
+
+			// S Shield (yellow diamond on chest)
+			AddBox(0.08f, 0.1f, 0.015f, 0, 0.48f, 0.13f, shield);
+			AddBox(0.04f, 0.06f, 0.012f, 0, 0.48f, 0.138f, cape);
 
 			// Head
 			AddSphere(0, 0.69f, 0, 0.088f, 8, 10, skin, 1.f, 1.15f, 0.92f);
